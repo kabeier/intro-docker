@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 2 · Leveraging Docker</title>
+<link rel="stylesheet" href="../shared/deck.css">
+<style>
+  pre .p { color: #ffe76a; }
+  pre .o { color: #9fe3b8; }
+  pre .e { color: #ff8a80; }
+  pre.term { font-size: 21px; line-height: 1.4; padding: 22px 26px; }
+  .lab { display: inline-block; align-self: flex-start; width: fit-content; font: 600 20px var(--mono); padding: 4px 12px; border-radius: 6px; background: var(--green); color: #fff; margin-bottom: 14px; }
+  .labref { font-size: 20px; color: #5b6577; margin-top: 10px; }
+  .card.tight p, .card.tight li { font-size: 23px; margin: 0 0 8px; }
+  .card.tight h3 { font-size: 27px; margin: 0 0 10px; }
+  .fname { font: 600 19px var(--mono); color: #5b6577; margin: 0 0 4px; }
+</style>
+</head>
+<body data-minutes="40">
+<div class="stage">
+
+<!-- ============ OPEN (0–4) ============ -->
+<section class="slide title" data-seg="Open" data-at="0">
+  <div class="kicker">Fundamentals · Docker · Part 2 of 2</div>
+  <h1>Leveraging Docker</h1>
+  <p class="sub">Write a Dockerfile, build your own image, run it, look inside, clean up, and automate it. All in your terminal.</p>
+  <aside class="notes">
+    <p><b>Before class</b> (demo-kit/RUNBOOK.md): run <code>demo-kit/reset.sh</code> so <code>hello-docker</code>, <code>file-demo</code>, <code>lecture2-demo</code> don't exist yet. <code>alpine</code> is pulled. An empty folder ready.</p>
+    <p>Tabs: this deck, <b>Terminal Lab 2</b> page, the activity page, VS Code. Terminal font big. Press <b>T</b>.</p>
+    <p>Backup if your machine misbehaves: <code>demo-kit/lecture2-demo/</code> has every finished file.</p>
+  </aside>
+</section>
+
+<section class="slide statement" data-seg="Open" data-at="1">
+  <h2>Lecture 1: other people's images. Today: yours.</h2>
+<pre class="term" style="font-size:24px"><span class="p">$</span> mkdir docker-lecture
+<span class="p">$</span> cd docker-lecture
+<span class="p">$</span> code .          <span class="c"># or open the folder in your editor</span></pre>
+  <ul class="small" style="margin-top:22px">
+    <li>Keep the terminal and the editor side by side</li>
+    <li>Every command is on the class site: <b>Terminal Lab 2</b>, with Copy buttons</li>
+  </ul>
+  <p class="bottomline">By the end: a Dockerfile, two images, and a script that does it all for you.</p>
+  <aside class="notes">
+    <p><b>** HANDS-ON, 1 minute. **</b> Wait until most have the empty folder open. "We create files in the editor, and run commands in the terminal."</p>
+    <p>No <code>code</code> command? Open the folder from the editor's File menu.</p>
+  </aside>
+</section>
+
+<section class="slide diagram" data-seg="The workflow" data-at="2">
+  <img src="../diagrams/DK2-01-pipeline.png" alt="A Dockerfile, the recipe, is plain text you write: FROM alpine latest and CMD echo hello world. docker build -t hello-docker . turns it into an image, the blueprint: a packaged snapshot that is inert and does nothing by itself. docker run hello-docker makes containers from the image, each run a new container. List images with docker images and containers with docker ps -a.">
+  <div class="src">diagrams/DK2-01-pipeline.tldr</div>
+  <aside class="notes">
+    <p>"A common mistake: thinking Docker is one thing you 'run'. It's a pipeline with three layers."</p>
+    <ul>
+      <li><b>Dockerfile</b> = the recipe. Plain text: what to start from, what files to include, what command to run.</li>
+      <li><b>Image</b> = the result of building the recipe. A blueprint. Inert: it does nothing until you run it.</li>
+      <li><b>Container</b> = a running instance. The building you can walk into.</li>
+    </ul>
+    <p>"Define once (Dockerfile), build once (image), run as many identical copies as you need (containers)."</p>
+  </aside>
+</section>
+
+<!-- ============ HELLO WORLD (4–9) ============ -->
+<section class="slide" data-seg="Your terminal: hello world" data-at="4">
+  <span class="lab">YOUR EDITOR · Lab step 1</span>
+  <h2>Your first Dockerfile</h2>
+  <div class="cols wide-left">
+    <div>
+      <p class="fname">docker-lecture/Dockerfile (no extension)</p>
+<pre class="term" style="font-size:28px">FROM alpine:latest
+CMD ["echo", "hello world!"]</pre>
+    </div>
+    <div class="card blue tight">
+      <h3><code>FROM</code></h3>
+      <p>Start from an image already published on Docker Hub. Docker pulls it, then runs the rest of the file.</p>
+      <h3 style="margin-top:16px"><code>CMD</code></h3>
+      <p>The command that runs when the container <b>starts</b>. A list of strings. <b>Only one per Dockerfile.</b></p>
+    </div>
+  </div>
+  <p class="bottomline">A Dockerfile is not magic: every line is an instruction you can read.</p>
+  <aside class="notes">
+    <p><b>** HANDS-ON, about 2 minutes. **</b> Create the file in the editor, named exactly <code>Dockerfile</code>: capital D, no <code>.txt</code>.</p>
+    <ul>
+      <li><code>alpine</code> = a very small Linux, about 8 MB. We opened a shell in it in Lecture 1.</li>
+      <li><code>CMD</code>: print "hello world!", then the container exits.</li>
+      <li>Remember Lecture 1: <code>latest</code> isn't "stable". The curriculum uses it here for simplicity; the homework is a good place to pin <code>alpine:3.20</code>.</li>
+    </ul>
+    <p><b>Windows Notepad</b> may save <code>Dockerfile.txt</code>: check with <code>ls</code> (or <code>dir</code>).</p>
+  </aside>
+</section>
+
+<section class="slide" data-seg="Your terminal: hello world" data-at="6">
+  <span class="lab">YOUR TERMINAL · Lab step 2</span>
+  <h2>Build it, find it, run it</h2>
+  <div class="cols wide-left">
+<pre class="term" style="font-size:20px"><span class="p">$</span> docker build -t hello-docker .
+<span class="o">#4 [1/1] FROM docker.io/library/alpine:latest
+#5 naming to docker.io/library/hello-docker done</span>
+
+<span class="p">$</span> docker images
+<span class="o">IMAGE                 ID             DISK USAGE
+hello-docker:latest   2a10af81544d       8.42MB</span>
+
+<span class="p">$</span> docker run hello-docker
+<span class="o">hello world!</span></pre>
+    <div class="card green tight">
+      <h3>The two flags</h3>
+      <p><code>-t hello-docker</code> = tag: a readable name for the image</p>
+      <p><code>.</code> = "use the Dockerfile in <b>this</b> folder". Don't forget the dot!</p>
+      <h3 style="margin-top:16px">You just did all three</h3>
+      <p>Dockerfile → <code>build</code> → image → <code>run</code> → container</p>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>** HANDS-ON, about 3 minutes. **</b> Thumbs up in chat on "hello world!".</p>
+    <ul>
+      <li>Build output: lines starting <code>#1 #2…</code> are steps. Find <code>FROM</code> and <code>naming to … hello-docker</code>. (Shortened on the slide.)</li>
+      <li>"Where is the image stored?" Inside Docker. <code>docker images</code> lists them. Older Docker shows <code>REPOSITORY TAG IMAGE ID CREATED SIZE</code>: same info.</li>
+      <li><code>docker run</code> created a container, which ran <code>echo</code>, then exited.</li>
+    </ul>
+    <p><b>"'docker buildx build' requires 1 argument"</b> → the dot is missing. <b>"failed to read dockerfile"</b> → wrong folder or file named <code>Dockerfile.txt</code>.</p>
+  </aside>
+</section>
+
+<!-- ============ COPY A FILE (9–16) ============ -->
+<section class="slide" data-seg="Your terminal: copy a file in" data-at="9">
+  <span class="lab">YOUR EDITOR + TERMINAL · Lab step 3</span>
+  <h2>Put a file inside the image</h2>
+  <div class="cols">
+    <div>
+      <p class="fname">message.txt</p>
+<pre class="term" style="margin-bottom:16px">Hello from inside the container.</pre>
+      <p class="fname">Dockerfile (replace it)</p>
+<pre class="term">FROM alpine:latest
+WORKDIR /app
+COPY message.txt /app/message.txt
+CMD ["cat", "/app/message.txt"]</pre>
+    </div>
+    <div>
+<pre class="term"><span class="p">$</span> docker build -t file-demo .
+<span class="o">#6 [2/3] WORKDIR /app
+#7 [3/3] COPY message.txt /app/message.txt</span>
+
+<span class="p">$</span> docker run file-demo
+<span class="o">Hello from inside the container.</span></pre>
+      <div class="card blue tight" style="margin-top:16px">
+        <p><code>WORKDIR /app</code> = make and go into <code>/app</code> inside the image</p>
+        <p><code>COPY a b</code> = from your folder → into the image (<code>COPY . /app/</code> = everything)</p>
+      </div>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>** HANDS-ON, about 4 minutes. **</b></p>
+    <ul>
+      <li>New tag <code>file-demo</code>, "so we don't overwrite the previous image".</li>
+      <li>Point at the build steps: <code>[2/3] WORKDIR</code>, <code>[3/3] COPY</code>. Each Dockerfile line is a step.</li>
+      <li><code>cat</code> instead of <code>echo</code>: print the file we copied in.</li>
+      <li>"Key Docker moment: your file is now <b>part of the image</b>. Anyone who builds this Dockerfile gets the same file, in the same place, every time."</li>
+    </ul>
+    <p><b>"message.txt: not found"</b> during build → the file isn't next to the Dockerfile, or is named <code>message.txt.txt</code>.</p>
+  </aside>
+</section>
+
+<section class="slide diagram" data-seg="Your terminal: copy a file in" data-at="13">
+  <img src="../diagrams/DK2-02-container-state.png" alt="hello-docker has two lines: FROM alpine latest, the environment, and CMD echo hello world, the execution command, with nothing in between. file-demo has four: FROM alpine latest, WORKDIR /app as the working directory, COPY message.txt into /app as your file baked in, and CMD cat /app/message.txt. Only one CMD per Dockerfile; it runs when the container starts, not when you build.">
+  <div class="src">diagrams/DK2-02-container-state.tldr</div>
+  <aside class="notes">
+    <p>The curriculum's "container state" pictures, side by side.</p>
+    <ul>
+      <li>hello-docker: <b>environment</b> + <b>execution command</b>.</li>
+      <li>file-demo: <b>environment</b>, <b>working directory</b>, <b>execution command</b> (+ the file).</li>
+    </ul>
+    <p>"Build time vs run time: <code>FROM</code>, <code>WORKDIR</code>, <code>COPY</code> happen when you <b>build</b>. <code>CMD</code> happens every time you <b>run</b>." That's the activity's bonus card.</p>
+  </aside>
+</section>
+
+<section class="slide" data-seg="Your terminal: look inside" data-at="14">
+  <span class="lab">YOUR TERMINAL · Lab step 4</span>
+  <h2>Look inside your own image</h2>
+  <div class="cols wide-left">
+<pre class="term"><span class="p">$</span> docker run -it --rm file-demo sh
+<span class="p">/app #</span> pwd
+<span class="o">/app</span>                  <span class="c">← WORKDIR</span>
+<span class="p">/app #</span> ls
+<span class="o">message.txt</span>           <span class="c">← COPY</span>
+<span class="p">/app #</span> cat message.txt
+<span class="o">Hello from inside the container.</span>
+<span class="p">/app #</span> exit</pre>
+    <div class="card green tight">
+      <h3>What happened?</h3>
+      <p>Adding <code>sh</code> at the end <b>replaces</b> the <code>CMD</code> for this one run</p>
+      <p>You start in <code>/app</code> because of <code>WORKDIR</code></p>
+      <p>This is how you debug: "is my file really in there?"</p>
+    </div>
+  </div>
+  <p class="bottomline">If you can't see it, open a shell and look.</p>
+  <aside class="notes">
+    <p><b>** HANDS-ON, about 2 minutes. **</b> Curriculum objective: "inspect what's happening inside that container".</p>
+    <ul>
+      <li>The prompt says <code>/app #</code>: the WORKDIR.</li>
+      <li><code>-it</code> + <code>--rm</code> from Lecture 1: type into it, delete it on exit.</li>
+      <li>Bonus (say only): <code>docker exec -it &lt;name&gt; sh</code> opens a shell in a container that's <i>already running</i>.</li>
+    </ul>
+    <p>Git Bash: "not a TTY" → prefix <code>winpty</code>.</p>
+  </aside>
+</section>
+
+<!-- ============ MANAGING (16–24) ============ -->
+<section class="slide diagram" data-seg="Cleaning up" data-at="16">
+  <img src="../diagrams/DK2-03-cleanup.png" alt="The image hello-docker is used by two containers: stupefied_blackburn, exited, and sleeper, up. docker ps shows only running containers; docker ps -a shows all, stopped too. Step 1: docker rm stupefied_blackburn works because it is stopped; docker rm -f sleeper is needed because it is running. Step 2: docker rmi hello-docker works only when no container uses it. Or never make a mess: docker run --rm removes the container as soon as it exits.">
+  <div class="src">diagrams/DK2-03-cleanup.tldr</div>
+  <aside class="notes">
+    <p>"Docker does <b>not</b> clean up after you. Every build and every run leaves something behind."</p>
+    <ul>
+      <li>Containers <b>depend on</b> images. So: containers first, then the image.</li>
+      <li>Stopped containers still exist, and <code>docker ps</code> hides them. That's the homework question "Why don't stopped containers appear with docker ps?"</li>
+    </ul>
+    <p>"Let's find our mess."</p>
+  </aside>
+</section>
+
+<section class="slide" data-seg="Your terminal: cleaning up" data-at="17">
+  <span class="lab">YOUR TERMINAL · Lab step 5</span>
+  <h2>Where did my containers go?</h2>
+  <div class="cols" style="grid-template-columns:1.9fr 1fr;gap:36px">
+<pre class="term" style="font-size:18px"><span class="p">$</span> docker ps
+<span class="o">CONTAINER ID   IMAGE   …   STATUS   NAMES</span>    <span class="c">← empty?!</span>
+
+<span class="p">$</span> docker ps -a
+<span class="o">CONTAINER ID   IMAGE          …  STATUS       NAMES
+2c35db8c8953   file-demo      …  Exited (0)   affectionate_shaw
+a239a14bf944   hello-docker   …  Exited (0)   stupefied_blackburn</span>
+
+<span class="p">$</span> docker rm stupefied_blackburn        <span class="c"># use YOUR name</span>
+<span class="o">stupefied_blackburn</span>
+
+<span class="p">$</span> docker run -d --name sleeper alpine sleep 300
+<span class="p">$</span> docker rm sleeper
+<span class="e">Error response from daemon: cannot remove container "sleeper":
+container is running: stop the container before removing
+or force remove</span>
+<span class="p">$</span> docker rm -f sleeper
+<span class="o">sleeper</span></pre>
+    <div class="card green tight">
+      <h3>Three ways</h3>
+      <p><code>docker rm name</code><br>stopped container</p>
+      <p><code>docker rm -f name</code><br>running: stop + remove. Use on purpose!</p>
+      <p><code>docker run --rm image</code><br>removed as soon as it exits: <b>no mess</b></p>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>** HANDS-ON, about 4 minutes. **</b></p>
+    <ul>
+      <li><code>docker ps</code> = running only. Ours ran for a split second, so: empty. "Beginners think they're gone. They're not."</li>
+      <li><code>docker ps -a</code> = all. Names are random (Docker picks adjective_scientist). <b>Everyone's names are different</b>: use yours. Tab completes them.</li>
+      <li><code>sleeper</code>: <code>-d</code> runs it in the background, <code>sleep 300</code> keeps it alive 5 minutes. Now <code>docker ps</code> shows it as <b>Up</b>.</li>
+      <li>The red error is real (dry run, Docker 29). Then <code>-f</code>.</li>
+      <li>Last: <code>--rm</code>. "For one-off containers, this is the best practice."</li>
+    </ul>
+    <p>Columns trimmed on the slide; theirs also show CREATED and PORTS.</p>
+  </aside>
+</section>
+
+<section class="slide" data-seg="Your terminal: cleaning up" data-at="21">
+  <span class="lab">YOUR TERMINAL · Lab step 6</span>
+  <h2>Why won't my image delete?</h2>
+  <div class="cols wide-left">
+<pre class="term" style="font-size:19px"><span class="p">$</span> docker rmi file-demo
+<span class="e">Error response from daemon: conflict: unable to remove
+repository reference "file-demo" (must force) - container
+2c35db8c8953 is using its referenced image b350f29a4f26</span>
+
+<span class="p">$</span> docker rm affectionate_shaw          <span class="c"># 1 · the container</span>
+<span class="p">$</span> docker rmi file-demo                 <span class="c"># 2 · then the image</span>
+<span class="o">Untagged: file-demo:latest
+Deleted: sha256:b350f29a4f26…</span>
+
+<span class="p">$</span> docker images                        <span class="c"># gone</span></pre>
+    <div class="card blue tight">
+      <h3>The rule</h3>
+      <p>Images can't be removed while a container depends on them</p>
+      <p>Order: <b>stop</b> → <b>remove the container</b> → <b>remove the image</b></p>
+      <h3 style="margin-top:16px">Same tag again?</h3>
+      <p><code>docker build -t file-demo .</code> twice moves the <b>name</b> to the new image. The old one stays (untagged) until nothing uses it.</p>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>** HANDS-ON, about 3 minutes. **</b> The IDs and names on their screens differ: read theirs.</p>
+    <ul>
+      <li>Read the error slowly: "container <b>2c35…</b> is using its referenced image". Docker is protecting you.</li>
+      <li>Then the curriculum's order: <code>docker rm -f container_name</code>, <code>docker rmi image_name</code>.</li>
+      <li>We'll rebuild <code>file-demo</code> in 7 minutes, so deleting it is fine.</li>
+    </ul>
+    <p><b>Untagged images</b>: Docker 29 hides them from <code>docker images</code> (older versions show <code>&lt;none&gt;</code>). <code>docker image prune</code> removes them. Mention only if asked.</p>
+  </aside>
+</section>
+
+<!-- ============ ACTIVITY (24–30) ============ -->
+<section class="slide activity" data-seg="Activity: Which command?" data-at="24">
+  <h2>Activity: Which command?</h2>
+  <div class="countdown" data-sec="360"></div>
+  <ol class="steps">
+    <li>A situation in your terminal appears</li>
+    <li>In chat on "go": the command (or flag) you'd type</li>
+    <li>Bonus: what would you see?</li>
+  </ol>
+  <p class="muted small" style="margin-top:24px">Page: activity-which-command/</p>
+  <aside class="notes">
+    <p>About 30 seconds a card; the first 6 are the core set. The error messages on cards 6 and 7 are the real ones from the last two slides.</p>
+    <p>Card 10 (bonus) leads into the next slide: you edited message.txt, why didn't the output change?</p>
+    <p>Answers are also in your Notes ("Docker Lectures - Teacher Guide").</p>
+  </aside>
+</section>
+
+<!-- ============ BIND MOUNT (30–33) ============ -->
+<section class="slide diagram" data-seg="Your files, live" data-at="30">
+  <img src="../diagrams/DK2-04-copy-vs-mount.png" alt="Top row: COPY during docker build puts a frozen copy of message.txt into the image file-demo; editing message.txt on the laptop means the container still prints the old text until you rebuild. Bottom row: docker run -v PWD:/app connects the laptop folder to /app in the container; edit message.txt and the next run prints the new text, no rebuild. Shipping an app: COPY. Working on it every day: a bind mount.">
+  <div class="src">diagrams/DK2-04-copy-vs-mount.tldr</div>
+  <aside class="notes">
+    <p>Curriculum objective: "connect your local machine's files to a running container to support real development workflows". The <code>run.sh</code> in a few minutes also mentions a bind mount.</p>
+    <ul>
+      <li><b>COPY</b> = a photocopy at build time. Edit the original: the photocopy doesn't change.</li>
+      <li><b>Bind mount</b> (<code>-v</code>) = a window into your folder. The container sees your files live.</li>
+    </ul>
+  </aside>
+</section>
+
+<section class="slide" data-seg="Your files, live" data-at="31">
+  <span class="lab">YOUR TERMINAL · Lab step 7</span>
+  <h2>Edit on your laptop, no rebuild</h2>
+  <div class="cols wide-left">
+<pre class="term" style="font-size:20px"><span class="p">$</span> docker build -t file-demo .
+<span class="c"># edit message.txt in your editor, save:</span>
+<span class="c">#   Edited on my laptop.</span>
+
+<span class="p">$</span> docker run --rm file-demo
+<span class="o">Hello from inside the container.</span>   <span class="c">← old (COPY)</span>
+
+<span class="p">$</span> docker run --rm -v "$PWD":/app file-demo
+<span class="o">Edited on my laptop.</span>              <span class="c">← live!</span></pre>
+    <div class="card blue tight">
+      <h3>Read the flag</h3>
+      <p><code>-v "$PWD":/app</code><br>my current folder → <code>/app</code> in the container</p>
+      <p><b>PowerShell:</b><br><code>-v "${PWD}:/app"</code></p>
+      <p><b>Git Bash:</b> put <code>MSYS_NO_PATHCONV=1</code> before <code>docker</code></p>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>** HANDS-ON, about 2 minutes. **</b> (Rebuild first: we deleted file-demo on slide 11.)</p>
+    <ul>
+      <li>Without <code>-v</code>: the old text. COPY froze it at build time.</li>
+      <li>With <code>-v</code>: the new text. Nothing rebuilt.</li>
+      <li>"This is how you'll develop with Docker later: code on your laptop, run it in the container."</li>
+    </ul>
+    <p>Git Bash rewrites <code>/app</code> into a Windows path; <code>MSYS_NO_PATHCONV=1</code> stops that.</p>
+  </aside>
+</section>
+
+<!-- ============ AUTOMATE (33–36) ============ -->
+<section class="slide" data-seg="Your terminal: automate it" data-at="33">
+  <span class="lab">YOUR EDITOR + TERMINAL · Lab step 8</span>
+  <h2>Stop retyping: <code>run.sh</code></h2>
+  <div class="cols wide-left">
+<pre class="term" style="font-size:17px;line-height:1.35">#!/usr/bin/env bash
+set -e
+<span class="c"># variables you may update to target the correct file</span>
+IMAGE_NAME="lecture2-demo"
+CONTAINER_NAME="lecture2-container"
+<span class="c"># this will rebuild the image within the docker engine</span>
+echo "Building image: $IMAGE_NAME"
+docker build -t "$IMAGE_NAME" .
+<span class="c"># this will run the container and automatically remove it upon completion</span>
+echo "Running container with bind mount..."
+docker run --rm --name "$CONTAINER_NAME" "$IMAGE_NAME"</pre>
+    <div>
+<pre class="term" style="font-size:18px"><span class="p">$</span> ./run.sh
+<span class="e">bash: ./run.sh: Permission denied</span>
+<span class="p">$</span> chmod +x run.sh
+<span class="p">$</span> ./run.sh
+<span class="o">Building image: lecture2-demo
+…
+Running container with bind mount...
+Edited on my laptop.</span></pre>
+      <div class="card red tight" style="margin-top:14px">
+        <p><b>Windows:</b> run it in <b>Git Bash</b> or <b>WSL</b>, not PowerShell or Command Prompt</p>
+      </div>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>** HANDS-ON, about 3 minutes. **</b> Copy <code>run.sh</code> from the lab page (word for word from the curriculum).</p>
+    <ul>
+      <li>Run it <b>before</b> <code>chmod</code> on purpose: "Permission denied" (seen in the dry run, in bash; zsh on a Mac words it a little differently, same meaning). A new file isn't allowed to run as a program. <code>chmod +x</code> = make it executable.</li>
+      <li><code>set -e</code> = stop at the first error.</li>
+      <li>Every <code>./run.sh</code> = build + run + clean up. <code>--rm</code> means no pile-up: check <code>docker ps -a</code>.</li>
+      <li>The output is whatever is in <b>their</b> message.txt (they edited it on slide 14).</li>
+      <li><b>Stretch</b> for fast students: add <code>-v "$PWD":/app</code> to the <code>docker run</code> line, so edits show without a rebuild.</li>
+    </ul>
+    <p>"Teams codify repeated steps into scripts, Makefiles or Compose files. Same mindset: fewer human errors."</p>
+  </aside>
+</section>
+
+<section class="slide" data-seg="Homework" data-at="36">
+  <h2>Two tools you'll need for the homework</h2>
+  <div class="cols">
+    <div class="card blue tight">
+      <h3>Task 3 · environment variables</h3>
+      <p><code>ENV NAME="value"</code> in a Dockerfile sets one</p>
+      <p><code>docker run --rm -e NAME="other" image</code> overrides it (the stretch)</p>
+      <p style="margin-top:12px"><b>Watch out:</b> <code>CMD ["echo", "$NAME"]</code> prints <code>$NAME</code> literally. The list form doesn't run a shell, so nothing swaps the variable in. <code>sh -c "…"</code> does.</p>
+    </div>
+    <div class="card green tight">
+      <h3>Task 4 · a script</h3>
+      <p>COPY the script in, then run it with its interpreter: <code>sh</code> or <code>python</code></p>
+      <p style="margin-top:12px"><b>Watch out:</b> <code>CMD ["./hello.sh"]</code> on a file without execute permission:</p>
+<pre class="term" style="font-size:16px;padding:12px 16px"><span class="e">exec: "./hello.sh": permission denied</span></pre>
+      <p>Same lesson as <code>run.sh</code>.</p>
+    </div>
+  </div>
+  <aside class="notes">
+    <p>2 minutes. These aren't in the lesson text, but Tasks 3 and 4 need them. Both "watch outs" were reproduced in the dry run.</p>
+    <p>Pick a base: Task 4 with a shell script → <code>alpine</code>. With Python → <code>python:3.12-slim</code> (Lecture 1!).</p>
+  </aside>
+</section>
+
+<section class="slide" data-seg="Wrap up" data-at="38">
+  <h2>Homework, Part II</h2>
+  <ol style="list-style:none;padding-left:0" class="small">
+    <li><b>Priority 1, Docker Fundamentals assignment:</b> Tasks 1–4, each in its own folder, every run with <code>--rm</code>. Then the <b>resource checklist</b> and its 3 questions</li>
+    <li><b>Priority 2, FreeCodeCamp:</b> 50 steps of your current certification</li>
+  </ol>
+  <div class="card green" style="margin-top:24px">
+    <h3>You can now</h3>
+    <p class="small">write a Dockerfile · <code>build</code> · <code>run</code> · look inside with <code>sh</code> · <code>ps -a</code> · <code>rm</code> · <code>rmi</code> · <code>--rm</code> · <code>-v</code> · automate with <code>run.sh</code></p>
+  </div>
+  <p class="bottomline">If Docker feels repetitive, that's the point.</p>
+  <aside class="notes">
+    <p>Full steps on the class site (Homework Part II), with git steps and "Or ask Claude" prompts. The assignment repo: github.com/Code-Platoon-Assignments/docker-fundamentals.</p>
+    <p>"In future lectures you'll run several containers together (Docker Compose)."</p>
+  </aside>
+</section>
+
+</div>
+<script src="../shared/deck.js"></script>
+</body>
+</html>

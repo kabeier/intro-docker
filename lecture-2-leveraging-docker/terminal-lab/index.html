@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Terminal Lab 2 · Leveraging Docker</title>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&display=swap" rel="stylesheet">
+<style>
+  :root { --paper:#f4f6f9; --grid:#dce3ee; --ink:#1b2230; --muted:#5b6577; --blue:#2552c9; --green:#13795b; --sticky:#ffe76a; --red:#b3261e; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Atkinson Hyperlegible', system-ui, sans-serif; color: var(--ink); font-size: 18px; line-height: 1.55;
+    background: var(--paper) linear-gradient(var(--grid) 1px, transparent 1px) -1px -1px / 40px 40px,
+                linear-gradient(90deg, var(--grid) 1px, transparent 1px) -1px -1px / 40px 40px; }
+  main { max-width: 900px; margin: 0 auto; padding: 48px 28px 80px; }
+  .back { color: var(--blue); font-weight: 700; }
+  h1 { font: 800 clamp(40px, 6vw, 64px)/0.98 'Bricolage Grotesque', sans-serif; letter-spacing: -0.03em; margin: 18px 0 14px; }
+  .lede { color: var(--muted); font-size: 20px; margin: 0 0 28px; max-width: 62ch; }
+  h2 { font: 800 28px/1.15 'Bricolage Grotesque', sans-serif; margin: 0 0 10px; }
+  h3 { font: 800 21px 'Bricolage Grotesque', sans-serif; margin: 26px 0 6px; }
+  section { background: #fff; border: 2px solid var(--ink); border-radius: 4px; padding: 28px; margin-bottom: 28px; }
+  section > p { margin: 0 0 14px; }
+  .choose { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }
+  .choose a { display: block; background: #fff; border: 2px solid var(--grid); border-radius: 4px; padding: 16px 18px; color: var(--ink); text-decoration: none; }
+  .choose a:hover, .choose a:focus-visible { border-color: var(--blue); }
+  .choose b { display: block; color: var(--blue); font-size: 20px; }
+  .choose span { color: var(--muted); font-size: 16px; }
+  @media (max-width: 700px) { .choose { grid-template-columns: 1fr; } }
+  ol.steps { padding-left: 1.4em; margin: 0 0 8px; }
+  ol.steps > li { margin-bottom: 14px; }
+  ol.steps > li::marker { font-weight: 700; color: var(--blue); }
+  code { font-size: 0.9em; background: #e8ecf3; padding: 1px 5px; border-radius: 3px; }
+  .cmdwrap { position: relative; margin: 8px 0 6px; }
+  pre.cmd { background: var(--ink); color: #fff; padding: 16px 18px; padding-right: 90px; border-radius: 4px; overflow-x: auto; margin: 0; font-size: 15px; }
+  pre.cmd code { background: none; padding: 0; }
+  pre.json { max-height: 420px; }
+  pre.pic { background: #fff; border: 2px solid var(--grid); border-radius: 4px; padding: 14px 18px; overflow-x: auto; font-size: 15px; margin: 8px 0 14px; }
+  .copy { position: absolute; top: 10px; right: 10px; font: 700 14px 'Atkinson Hyperlegible'; padding: 6px 12px; border-radius: 4px; border: 0; background: var(--sticky); color: var(--ink); cursor: pointer; }
+  .note { margin: 10px 0 0; padding: 14px 18px; background: var(--sticky); transform: rotate(-0.4deg); }
+  .req { border: 2px solid var(--grid); border-radius: 4px; padding: 16px 18px; margin: 14px 0; }
+  .req h3 { margin: 0 0 8px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .method { font: 700 15px 'Atkinson Hyperlegible'; color: #fff; background: var(--blue); padding: 2px 8px; border-radius: 3px; }
+  .method.post { background: var(--green); }
+  .req dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; margin: 0; }
+  .req dt { font-weight: 700; color: var(--muted); }
+  .req dd { margin: 0; overflow-wrap: anywhere; }
+  .expect { color: var(--green); font-weight: 700; }
+  .bad { color: var(--red); font-weight: 700; }
+  table { width: 100%; border-collapse: collapse; font-size: 16px; }
+  th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+  th { font-size: 15px; color: var(--muted); }
+  .dl { display: inline-block; background: var(--sticky); color: var(--ink); font-weight: 700; text-decoration: none; padding: 12px 18px; border-radius: 4px; margin: 4px 0 10px; }
+  details { margin-top: 10px; } summary { cursor: pointer; font-weight: 700; color: var(--blue); }
+  a { color: var(--blue); }
+  a:focus-visible, summary:focus-visible, .copy:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+
+  pre.see { background: #fff; border: 2px solid var(--grid); border-left: 8px solid var(--green); border-radius: 4px; padding: 12px 16px; overflow-x: auto; font-size: 15px; margin: 6px 0 12px; }
+  pre.see .e { color: var(--red); white-space: pre-wrap; }
+  .label { font-weight: 700; color: var(--green); font-size: 15px; margin-top: 6px; }
+  .os { display: grid; grid-template-columns: 1fr; gap: 0 20px; }
+  .os h4 { margin: 6px 0 2px; font-size: 16px; }
+  @media (max-width: 700px) { .os { grid-template-columns: 1fr; } }
+  section h2 .n { color: var(--blue); }
+  td code { overflow-wrap: anywhere; }
+  .os > div, ol.steps > li { min-width: 0; }
+  @media (max-width: 700px) { table { display: block; overflow-x: auto; } section { padding: 18px; } }
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="../../">← Docker home</a>
+  <h1>Terminal Lab 2: build your own image</h1>
+  <p class="lede">Type along with Lecture 2. You write files in your editor and run commands in your terminal. Container names and IDs are random, so <b>yours will differ</b>: always use the ones your terminal shows.</p>
+
+  <div class="choose">
+    <a href="#s1"><b>In class</b><span>Steps 1–8 follow the slides. About 25 minutes of typing.</span></a>
+    <a href="#breaks"><b>Something broke?</b><span>Jump to the table at the bottom.</span></a>
+  </div>
+
+  <section>
+    <h2>Before you start</h2>
+    <ol class="steps">
+      <li><code>docker run --rm hello-world</code> works (Terminal Lab 1, step 1).</li>
+      <li>Make a folder and open it in your editor:
+        <div class="cmdwrap"><pre class="cmd"><code>mkdir docker-lecture
+cd docker-lecture
+code .</code></pre><button type="button" class="copy">Copy</button></div>
+        No <code>code</code> command? Open the folder from your editor's File menu.</li>
+      <li>Windows: use <b>Git Bash</b> or <b>WSL</b> for step 8 (<code>run.sh</code>). PowerShell is fine for steps 1–7.</li>
+    </ol>
+  </section>
+
+  <section id="s1">
+    <h2><span class="n">1 ·</span> Your first Dockerfile</h2>
+    <p>In the editor, create a file named exactly <code>Dockerfile</code>: capital D, <b>no extension</b>.</p>
+    <div class="cmdwrap"><pre class="cmd"><code>FROM alpine:latest
+CMD ["echo", "hello world!"]</code></pre><button type="button" class="copy">Copy</button></div>
+    <ul>
+      <li><code>FROM</code>: start from an image published on Docker Hub (Docker pulls it).</li>
+      <li><code>CMD</code>: the command that runs when the container <b>starts</b>. A list of strings. Only one per Dockerfile.</li>
+    </ul>
+  </section>
+
+  <section id="s2">
+    <h2><span class="n">2 ·</span> Build it, find it, run it</h2>
+    <p>The dot at the end means "the Dockerfile in this folder". Don't forget it.</p>
+    <div class="cmdwrap"><pre class="cmd"><code>docker build -t hello-docker .</code></pre><button type="button" class="copy">Copy</button></div>
+<pre class="see">#4 [1/1] FROM docker.io/library/alpine:latest
+#5 exporting to image
+#5 naming to docker.io/library/hello-docker done</pre>
+    <div class="cmdwrap"><pre class="cmd"><code>docker images</code></pre><button type="button" class="copy">Copy</button></div>
+<pre class="see">IMAGE                 ID             DISK USAGE   CONTENT SIZE   EXTRA
+hello-docker:latest   2a10af81544d       8.42MB             0B
+…</pre>
+    <div class="cmdwrap"><pre class="cmd"><code>docker run hello-docker</code></pre><button type="button" class="copy">Copy</button></div>
+<pre class="see">hello world!</pre>
+    <p>Dockerfile → <code>build</code> → image → <code>run</code> → container. That's the whole workflow.</p>
+  </section>
+
+  <section id="s3">
+    <h2><span class="n">3 ·</span> Put a file inside the image</h2>
+    <ol class="steps">
+      <li>Create <code>message.txt</code> next to the Dockerfile:
+        <div class="cmdwrap"><pre class="cmd"><code>Hello from inside the container.</code></pre><button type="button" class="copy">Copy</button></div></li>
+      <li>Replace the whole Dockerfile with:
+        <div class="cmdwrap"><pre class="cmd"><code>FROM alpine:latest
+WORKDIR /app
+COPY message.txt /app/message.txt
+CMD ["cat", "/app/message.txt"]</code></pre><button type="button" class="copy">Copy</button></div>
+        <code>WORKDIR /app</code> makes and enters <code>/app</code> inside the image. <code>COPY</code> takes a file from your folder into the image. (<code>COPY . /app/</code> copies everything.)</li>
+      <li>Build it under a <b>new</b> name, so <code>hello-docker</code> isn't overwritten, then run it:
+        <div class="cmdwrap"><pre class="cmd"><code>docker build -t file-demo .
+docker run file-demo</code></pre><button type="button" class="copy">Copy</button></div>
+<pre class="see">#6 [2/3] WORKDIR /app
+#7 [3/3] COPY message.txt /app/message.txt
+…
+Hello from inside the container.</pre></li>
+    </ol>
+  </section>
+
+  <section id="s4">
+    <h2><span class="n">4 ·</span> Look inside your own image</h2>
+    <p>Adding <code>sh</code> at the end replaces the <code>CMD</code> for this one run:</p>
+    <div class="cmdwrap"><pre class="cmd"><code>docker run -it --rm file-demo sh</code></pre><button type="button" class="copy">Copy</button></div>
+    <div class="cmdwrap"><pre class="cmd"><code>pwd
+ls
+cat message.txt
+exit</code></pre><button type="button" class="copy">Copy</button></div>
+<pre class="see">/app # pwd
+/app                     ← WORKDIR
+/app # ls
+message.txt              ← COPY
+/app # cat message.txt
+Hello from inside the container.
+/app # exit</pre>
+  </section>
+
+  <section id="s5">
+    <h2><span class="n">5 ·</span> Where did my containers go?</h2>
+    <ol class="steps">
+      <li>Running containers only:
+        <div class="cmdwrap"><pre class="cmd"><code>docker ps</code></pre><button type="button" class="copy">Copy</button></div>
+<pre class="see">CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES       ← empty</pre></li>
+      <li>All containers, stopped ones too:
+        <div class="cmdwrap"><pre class="cmd"><code>docker ps -a</code></pre><button type="button" class="copy">Copy</button></div>
+<pre class="see">CONTAINER ID   IMAGE          COMMAND                  CREATED         STATUS                     NAMES
+2c35db8c8953   file-demo      "cat /app/message.txt"   1 minute ago    Exited (0) 1 minute ago    affectionate_shaw
+a239a14bf944   hello-docker   "echo 'hello world!'"    3 minutes ago   Exited (0) 3 minutes ago   stupefied_blackburn</pre>
+        You may also see a <code>hello-world</code> container from Lab 1. Your names are different: Docker picks them at random.</li>
+      <li>Remove the stopped <code>hello-docker</code> container. Use <b>your</b> name (Tab completes it):
+        <div class="cmdwrap"><pre class="cmd"><code>docker rm YOUR_CONTAINER_NAME</code></pre><button type="button" class="copy">Copy</button></div></li>
+      <li>Start a container that keeps running for 5 minutes (<code>-d</code> = in the background), and try to remove it:
+        <div class="cmdwrap"><pre class="cmd"><code>docker run -d --name sleeper alpine sleep 300
+docker ps
+docker rm sleeper</code></pre><button type="button" class="copy">Copy</button></div>
+<pre class="see"><span class="e">Error response from daemon: cannot remove container "sleeper": container is running: stop the container before removing or force remove</span></pre></li>
+      <li>Force it (stop + remove in one step):
+        <div class="cmdwrap"><pre class="cmd"><code>docker rm -f sleeper</code></pre><button type="button" class="copy">Copy</button></div></li>
+      <li>Never make a mess in the first place: <code>--rm</code> deletes the container as soon as it exits.
+        <div class="cmdwrap"><pre class="cmd"><code>docker run --rm hello-docker
+docker ps -a</code></pre><button type="button" class="copy">Copy</button></div>
+        No new container in the list.</li>
+    </ol>
+  </section>
+
+  <section id="s6">
+    <h2><span class="n">6 ·</span> Why won't my image delete?</h2>
+    <ol class="steps">
+      <li>Try to delete <code>file-demo</code> while its stopped container still exists:
+        <div class="cmdwrap"><pre class="cmd"><code>docker rmi file-demo</code></pre><button type="button" class="copy">Copy</button></div>
+<pre class="see"><span class="e">Error response from daemon: conflict: unable to remove repository reference "file-demo" (must force) - container 2c35db8c8953 is using its referenced image b350f29a4f26</span></pre></li>
+      <li>Containers depend on images. Remove the container first (your name from <code>docker ps -a</code>), then the image:
+        <div class="cmdwrap"><pre class="cmd"><code>docker rm YOUR_FILE_DEMO_CONTAINER
+docker rmi file-demo
+docker images</code></pre><button type="button" class="copy">Copy</button></div>
+<pre class="see">Untagged: file-demo:latest
+Deleted: sha256:b350f29a4f26…</pre></li>
+    </ol>
+    <p class="note"><b>Same tag twice?</b> <code>docker build -t file-demo .</code> again moves the <b>name</b> to the new image. The old image stays, untagged, until nothing uses it. (Docker 29 hides untagged images from <code>docker images</code>; older versions show them as <code>&lt;none&gt;</code>.)</p>
+  </section>
+
+  <section id="s7">
+    <h2><span class="n">7 ·</span> Edit on your laptop, no rebuild (bind mount)</h2>
+    <ol class="steps">
+      <li>Rebuild <code>file-demo</code> (we deleted it in step 6):
+        <div class="cmdwrap"><pre class="cmd"><code>docker build -t file-demo .</code></pre><button type="button" class="copy">Copy</button></div></li>
+      <li>In the editor, change <code>message.txt</code> to <code>Edited on my laptop.</code> and <b>save</b>.</li>
+      <li>Run it the normal way. You get the <b>old</b> text: COPY froze it at build time.
+        <div class="cmdwrap"><pre class="cmd"><code>docker run --rm file-demo</code></pre><button type="button" class="copy">Copy</button></div>
+<pre class="see">Hello from inside the container.</pre></li>
+      <li>Now lend the container your folder with <code>-v</code> (your folder → <code>/app</code>):
+        <div class="os">
+          <div><h4>Mac · Linux · WSL</h4>
+            <div class="cmdwrap"><pre class="cmd"><code>docker run --rm -v "$PWD":/app file-demo</code></pre><button type="button" class="copy">Copy</button></div></div>
+          <div><h4>PowerShell</h4>
+            <div class="cmdwrap"><pre class="cmd"><code>docker run --rm -v "${PWD}:/app" file-demo</code></pre><button type="button" class="copy">Copy</button></div></div>
+        </div>
+        <b>Git Bash:</b> <code>MSYS_NO_PATHCONV=1 docker run --rm -v "$PWD":/app file-demo</code>
+<pre class="see">Edited on my laptop.        ← live, no rebuild</pre></li>
+    </ol>
+  </section>
+
+  <section id="s8">
+    <h2><span class="n">8 ·</span> Automate it: <code>run.sh</code></h2>
+    <ol class="steps">
+      <li>Create <code>run.sh</code> next to the Dockerfile:
+        <div class="cmdwrap"><pre class="cmd"><code>#!/usr/bin/env bash
+set -e
+# variables you may update to target the correct file
+IMAGE_NAME="lecture2-demo"
+CONTAINER_NAME="lecture2-container"
+# this will rebuild the image within the docker engine
+echo "Building image: $IMAGE_NAME"
+docker build -t "$IMAGE_NAME" .
+# this will run the container and automatically remove it upon completion
+echo "Running container with bind mount..."
+docker run --rm --name "$CONTAINER_NAME" "$IMAGE_NAME"</code></pre><button type="button" class="copy">Copy</button></div></li>
+      <li>Try to run it:
+        <div class="cmdwrap"><pre class="cmd"><code>./run.sh</code></pre><button type="button" class="copy">Copy</button></div>
+<pre class="see"><span class="e">bash: ./run.sh: Permission denied</span>       ← a new file isn't allowed to run yet</pre></li>
+      <li>Make it executable, then run it again:
+        <div class="cmdwrap"><pre class="cmd"><code>chmod +x run.sh
+./run.sh</code></pre><button type="button" class="copy">Copy</button></div>
+<pre class="see">Building image: lecture2-demo
+…
+Running container with bind mount...
+Edited on my laptop.</pre></li>
+      <li><code>docker ps -a</code>: no <code>lecture2-container</code>, thanks to <code>--rm</code>.</li>
+    </ol>
+    <p class="note"><b>Windows:</b> run <code>run.sh</code> in <b>Git Bash</b> or <b>WSL</b>. PowerShell and Command Prompt can't run it. <b>Stretch:</b> add <code>-v "$PWD":/app</code> to the <code>docker run</code> line, so edits to message.txt show without a rebuild.</p>
+  </section>
+
+  <section>
+    <h2>Clean up everything from today</h2>
+    <p>Check what's there first, then remove the containers, then the images:</p>
+    <div class="cmdwrap"><pre class="cmd"><code>docker ps -a
+docker rm YOUR_LEFTOVER_CONTAINER_NAMES
+docker rmi hello-docker file-demo lecture2-demo</code></pre><button type="button" class="copy">Copy</button></div>
+    <p>Keep <code>alpine</code>: the homework uses it.</p>
+  </section>
+
+  <section id="breaks">
+    <h2>When something breaks</h2>
+    <table>
+      <tr><th>You see</th><th>It means</th><th>Fix</th></tr>
+      <tr><td><code>docker build</code> requires 1 argument</td><td>The dot is missing</td><td><code>docker build -t name .</code></td></tr>
+      <tr><td><code>failed to read dockerfile</code> / no such file</td><td>Wrong folder, or the file is <code>Dockerfile.txt</code></td><td><code>ls</code> (or <code>dir</code>). Rename to <code>Dockerfile</code>, <code>cd</code> to its folder</td></tr>
+      <tr><td><code>"/message.txt": not found</code> during build</td><td>message.txt isn't next to the Dockerfile, or is <code>message.txt.txt</code></td><td>Move or rename it, build again</td></tr>
+      <tr><td><code>docker ps</code> is empty</td><td>Your containers already exited</td><td><code>docker ps -a</code></td></tr>
+      <tr><td><code>container is running: stop the container before removing or force remove</code></td><td>You can't <code>rm</code> a running container</td><td><code>docker rm -f name</code> (on purpose!)</td></tr>
+      <tr><td><code>conflict: unable to remove repository reference</code></td><td>A container still uses that image</td><td><code>docker rm</code> the container first, then <code>docker rmi</code></td></tr>
+      <tr><td><code>Conflict. The container name "/sleeper" is already in use</code></td><td>An old <code>sleeper</code> still exists</td><td><code>docker rm -f sleeper</code>, then run again</td></tr>
+      <tr><td>Old text after editing message.txt</td><td>COPY happened at build time</td><td>Rebuild, or use the bind mount (step 7)</td></tr>
+      <tr><td><code>Permission denied</code> on <code>./run.sh</code></td><td>The file isn't executable</td><td><code>chmod +x run.sh</code></td></tr>
+      <tr><td><code>the input device is not a TTY</code> (Git Bash)</td><td>Git Bash needs help with <code>-it</code></td><td><code>winpty docker run -it …</code>, or PowerShell</td></tr>
+    </table>
+  </section>
+
+</main>
+<script>
+  document.querySelectorAll('.copy').forEach((b) => b.onclick = async () => {
+    await navigator.clipboard.writeText(b.previousElementSibling.innerText.trim()); b.textContent = 'Copied'; setTimeout(() => (b.textContent = 'Copy'), 1500)
+  })
+</script>
+</body>
+</html>

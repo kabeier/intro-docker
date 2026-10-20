@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Terminal Lab 1 · Intro to Docker</title>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&display=swap" rel="stylesheet">
+<style>
+  :root { --paper:#f4f6f9; --grid:#dce3ee; --ink:#1b2230; --muted:#5b6577; --blue:#2552c9; --green:#13795b; --sticky:#ffe76a; --red:#b3261e; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Atkinson Hyperlegible', system-ui, sans-serif; color: var(--ink); font-size: 18px; line-height: 1.55;
+    background: var(--paper) linear-gradient(var(--grid) 1px, transparent 1px) -1px -1px / 40px 40px,
+                linear-gradient(90deg, var(--grid) 1px, transparent 1px) -1px -1px / 40px 40px; }
+  main { max-width: 900px; margin: 0 auto; padding: 48px 28px 80px; }
+  .back { color: var(--blue); font-weight: 700; }
+  h1 { font: 800 clamp(40px, 6vw, 64px)/0.98 'Bricolage Grotesque', sans-serif; letter-spacing: -0.03em; margin: 18px 0 14px; }
+  .lede { color: var(--muted); font-size: 20px; margin: 0 0 28px; max-width: 62ch; }
+  h2 { font: 800 28px/1.15 'Bricolage Grotesque', sans-serif; margin: 0 0 10px; }
+  h3 { font: 800 21px 'Bricolage Grotesque', sans-serif; margin: 26px 0 6px; }
+  section { background: #fff; border: 2px solid var(--ink); border-radius: 4px; padding: 28px; margin-bottom: 28px; }
+  section > p { margin: 0 0 14px; }
+  .choose { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }
+  .choose a { display: block; background: #fff; border: 2px solid var(--grid); border-radius: 4px; padding: 16px 18px; color: var(--ink); text-decoration: none; }
+  .choose a:hover, .choose a:focus-visible { border-color: var(--blue); }
+  .choose b { display: block; color: var(--blue); font-size: 20px; }
+  .choose span { color: var(--muted); font-size: 16px; }
+  @media (max-width: 700px) { .choose { grid-template-columns: 1fr; } }
+  ol.steps { padding-left: 1.4em; margin: 0 0 8px; }
+  ol.steps > li { margin-bottom: 14px; }
+  ol.steps > li::marker { font-weight: 700; color: var(--blue); }
+  code { font-size: 0.9em; background: #e8ecf3; padding: 1px 5px; border-radius: 3px; }
+  .cmdwrap { position: relative; margin: 8px 0 6px; }
+  pre.cmd { background: var(--ink); color: #fff; padding: 16px 18px; padding-right: 90px; border-radius: 4px; overflow-x: auto; margin: 0; font-size: 15px; }
+  pre.cmd code { background: none; padding: 0; }
+  pre.json { max-height: 420px; }
+  pre.pic { background: #fff; border: 2px solid var(--grid); border-radius: 4px; padding: 14px 18px; overflow-x: auto; font-size: 15px; margin: 8px 0 14px; }
+  .copy { position: absolute; top: 10px; right: 10px; font: 700 14px 'Atkinson Hyperlegible'; padding: 6px 12px; border-radius: 4px; border: 0; background: var(--sticky); color: var(--ink); cursor: pointer; }
+  .note { margin: 10px 0 0; padding: 14px 18px; background: var(--sticky); transform: rotate(-0.4deg); }
+  .req { border: 2px solid var(--grid); border-radius: 4px; padding: 16px 18px; margin: 14px 0; }
+  .req h3 { margin: 0 0 8px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .method { font: 700 15px 'Atkinson Hyperlegible'; color: #fff; background: var(--blue); padding: 2px 8px; border-radius: 3px; }
+  .method.post { background: var(--green); }
+  .req dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; margin: 0; }
+  .req dt { font-weight: 700; color: var(--muted); }
+  .req dd { margin: 0; overflow-wrap: anywhere; }
+  .expect { color: var(--green); font-weight: 700; }
+  .bad { color: var(--red); font-weight: 700; }
+  table { width: 100%; border-collapse: collapse; font-size: 16px; }
+  th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+  th { font-size: 15px; color: var(--muted); }
+  .dl { display: inline-block; background: var(--sticky); color: var(--ink); font-weight: 700; text-decoration: none; padding: 12px 18px; border-radius: 4px; margin: 4px 0 10px; }
+  details { margin-top: 10px; } summary { cursor: pointer; font-weight: 700; color: var(--blue); }
+  a { color: var(--blue); }
+  a:focus-visible, summary:focus-visible, .copy:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+
+  pre.see { background: #fff; border: 2px solid var(--grid); border-left: 8px solid var(--green); border-radius: 4px; padding: 12px 16px; overflow-x: auto; font-size: 15px; margin: 6px 0 12px; }
+  pre.see .e { color: var(--red); white-space: pre-wrap; }
+  .label { font-weight: 700; color: var(--green); font-size: 15px; margin-top: 6px; }
+  .os { display: grid; grid-template-columns: 1fr; gap: 0 20px; }
+  .os h4 { margin: 6px 0 2px; font-size: 16px; }
+  @media (max-width: 700px) { .os { grid-template-columns: 1fr; } }
+  section h2 .n { color: var(--blue); }
+  td code { overflow-wrap: anywhere; }
+  .os > div, ol.steps > li { min-width: 0; }
+  @media (max-width: 700px) { table { display: block; overflow-x: auto; } section { padding: 18px; } }
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="../../">← Docker home</a>
+  <h1>Terminal Lab 1: your first containers</h1>
+  <p class="lede">Type along with Lecture 1. Every command has a Copy button, and every step shows what you should see. Your IDs, names and version numbers may differ a little; that's normal.</p>
+
+  <div class="choose">
+    <a href="#s1"><b>In class</b><span>Steps 1–4 follow the slides. About 15 minutes of typing.</span></a>
+    <a href="#breaks"><b>Something broke?</b><span>Jump to the table at the bottom.</span></a>
+  </div>
+
+  <section>
+    <h2>Before you start</h2>
+    <ol class="steps">
+      <li><b>Install Docker</b> for your OS: <a href="https://docs.docker.com/desktop/setup/install/mac-install/" target="_blank" rel="noopener">Mac</a> · <a href="https://docs.docker.com/desktop/setup/install/windows-install/" target="_blank" rel="noopener">Windows</a> (Docker Desktop, with WSL 2) · <a href="https://docs.docker.com/engine/install/" target="_blank" rel="noopener">Linux</a> (Docker Engine).</li>
+      <li><b>Mac and Windows:</b> open <b>Docker Desktop</b> and wait until it says the engine is running. Docker only works while it runs.</li>
+      <li>Open a terminal: <b>Terminal</b> on Mac, <b>PowerShell</b> or <b>Git Bash</b> on Windows, your usual terminal on Linux.</li>
+    </ol>
+  </section>
+
+  <section id="s1">
+    <h2><span class="n">1 ·</span> Is Docker working?</h2>
+    <div class="cmdwrap"><pre class="cmd"><code>docker version</code></pre><button type="button" class="copy">Copy</button></div>
+    <p class="label">You should see two sections:</p>
+<pre class="see">Client: …
+ Version:           29.x
+Server: …                      ← the Docker Engine (the background service)
+ Engine:
+  Version:          29.x</pre>
+    <div class="cmdwrap"><pre class="cmd"><code>docker run hello-world</code></pre><button type="button" class="copy">Copy</button></div>
+    <p class="label">You should see:</p>
+<pre class="see">Unable to find image 'hello-world:latest' locally     ← not an error: it downloads it
+latest: Pulling from library/hello-world
+…
+Hello from Docker!
+This message shows that your installation appears to be working correctly.</pre>
+    <p>Read Docker's 4 numbered steps under that message: client → daemon → pulled from Docker Hub → created a container → output to your terminal. That's the whole lecture.</p>
+  </section>
+
+  <section id="s2">
+    <h2><span class="n">2 ·</span> Step inside a container</h2>
+    <p>Which operating system is inside an <code>alpine</code> container?</p>
+    <div class="cmdwrap"><pre class="cmd"><code>docker run --rm alpine cat /etc/os-release</code></pre><button type="button" class="copy">Copy</button></div>
+<pre class="see">NAME="Alpine Linux"
+ID=alpine
+VERSION_ID=3.24.2           ← a tiny Linux, even on a Mac or Windows laptop</pre>
+    <p>Now open a shell <b>inside</b> it. <code>-it</code> = let me type into it. <code>--rm</code> = delete the container when I leave.</p>
+    <div class="cmdwrap"><pre class="cmd"><code>docker run -it --rm alpine sh</code></pre><button type="button" class="copy">Copy</button></div>
+    <p>The prompt changes to <code>/ #</code>. You're inside. Type these one at a time:</p>
+    <div class="cmdwrap"><pre class="cmd"><code>whoami
+ls /
+ps
+exit</code></pre><button type="button" class="copy">Copy</button></div>
+<pre class="see">/ # whoami
+root
+/ # ls /
+bin    dev    etc    home   lib    media  mnt    opt    proc   root   run    sbin   srv    sys    tmp    usr    var
+/ # ps
+PID   USER     TIME  COMMAND
+    1 root      0:00 sh          ← the container IS this process
+    7 root      0:00 ps
+/ # exit</pre>
+    <p class="note">Only 2 processes. Your laptop runs hundreds. A container is an <b>isolated process</b>, not a mini computer.</p>
+  </section>
+
+  <section id="s3">
+    <h2><span class="n">3 ·</span> Pull from Docker Hub, compare sizes</h2>
+    <ol class="steps">
+      <li>Open <a href="https://hub.docker.com/_/python" target="_blank" rel="noopener">hub.docker.com/_/python</a>. Find the <b>Docker Official Image</b> badge, the <b>Tags</b> tab, the sizes, and the pull command.</li>
+      <li>Pull two small versions of the same Python (about 175 MB together):
+        <div class="cmdwrap"><pre class="cmd"><code>docker pull python:3.12-slim
+docker pull python:3.12-alpine</code></pre><button type="button" class="copy">Copy</button></div></li>
+      <li>List the images on your machine:
+        <div class="cmdwrap"><pre class="cmd"><code>docker images</code></pre><button type="button" class="copy">Copy</button></div>
+<pre class="see">IMAGE                ID             DISK USAGE   CONTENT SIZE   EXTRA
+alpine:latest        320994c3b997       8.42MB             0B
+hello-world:latest   e2ac70e7319a       10.1kB             0B
+python:3.12-alpine   979e5a8a5684       55.2MB             0B
+python:3.12-slim     df18428df8a0        119MB             0B</pre>
+        Older Docker shows <code>REPOSITORY  TAG  IMAGE ID  CREATED  SIZE</code> instead: same information. For comparison, the full <code>python:3.12</code> is <b>1.11 GB</b>. Don't pull it on class Wi-Fi.</li>
+    </ol>
+  </section>
+
+  <section id="s4">
+    <h2><span class="n">4 ·</span> The same Python on every laptop</h2>
+    <p>Your laptop's Python (Windows: <code>python --version</code>):</p>
+    <div class="cmdwrap"><pre class="cmd"><code>python3 --version</code></pre><button type="button" class="copy">Copy</button></div>
+    <p>The container's Python:</p>
+    <div class="cmdwrap"><pre class="cmd"><code>docker run --rm python:3.12-slim python --version</code></pre><button type="button" class="copy">Copy</button></div>
+<pre class="see">Python 3.12.15          ← the same for everyone in the class</pre>
+    <p>A real Python you never installed. <code>exit()</code> leaves it:</p>
+    <div class="cmdwrap"><pre class="cmd"><code>docker run -it --rm python:3.12-slim python</code></pre><button type="button" class="copy">Copy</button></div>
+<pre class="see">&gt;&gt;&gt; print("hello from a container")
+hello from a container
+&gt;&gt;&gt; exit()</pre>
+    <p class="note"><b>Why not just <code>docker run python</code>?</b> It pulls <code>python:latest</code> (about 1.1 GB), then prints nothing and exits: without <code>-it</code> there's no terminal for Python to talk to. Pin a small tag, and add <code>-it</code> when you want to type.</p>
+  </section>
+
+  <section>
+    <h2>Check: you're done when…</h2>
+    <ol class="steps">
+      <li><code>docker version</code> shows a <b>Server</b> section</li>
+      <li><code>docker run hello-world</code> prints "Hello from Docker!"</li>
+      <li><code>docker images</code> lists <code>alpine</code> and <code>python:3.12-slim</code></li>
+      <li><code>docker run --rm python:3.12-slim python --version</code> prints Python 3.12</li>
+      <li><code>docker ps -a</code> doesn't list any alpine or python containers (thanks to <code>--rm</code>). It does list hello-world: we ran it without <code>--rm</code>. Lecture 2 cleans that up.</li>
+    </ol>
+  </section>
+
+  <section id="breaks">
+    <h2>When something breaks</h2>
+    <table>
+      <tr><th>You see</th><th>It means</th><th>Fix</th></tr>
+      <tr><td><code>Cannot connect to the Docker daemon</code>, or no <b>Server</b> section</td><td>The Docker Engine isn't running</td><td>Mac/Windows: open Docker Desktop and wait. Linux: <code>sudo systemctl start docker</code></td></tr>
+      <tr><td><code>docker: command not found</code></td><td>Docker isn't installed, or the terminal was open before the install</td><td>Install it, then open a <b>new</b> terminal</td></tr>
+      <tr><td><code>permission denied … docker.sock</code> (Linux)</td><td>Your user isn't in the <code>docker</code> group</td><td><code>sudo usermod -aG docker $USER</code>, then log out and in</td></tr>
+      <tr><td>Docker Desktop on Windows asks for WSL</td><td>Docker Desktop needs WSL 2</td><td>PowerShell as admin: <code>wsl --install</code>, restart</td></tr>
+      <tr><td><code>the input device is not a TTY</code> (Git Bash)</td><td>Git Bash needs help with <code>-it</code></td><td>Put <code>winpty</code> in front: <code>winpty docker run -it --rm alpine sh</code>. Or use PowerShell</td></tr>
+      <tr><td><code>python3: command not found</code></td><td>No Python on your laptop</td><td>That's fine, and it's the point: the container has it</td></tr>
+      <tr><td>Pull is very slow</td><td>Everyone is downloading at once</td><td>Pull only <code>python:3.12-alpine</code> (smallest), or finish at home</td></tr>
+    </table>
+  </section>
+
+</main>
+<script>
+  document.querySelectorAll('.copy').forEach((b) => b.onclick = async () => {
+    await navigator.clipboard.writeText(b.previousElementSibling.innerText.trim()); b.textContent = 'Copied'; setTimeout(() => (b.textContent = 'Copy'), 1500)
+  })
+</script>
+</body>
+</html>

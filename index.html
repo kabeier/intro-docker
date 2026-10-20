@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Docker</title>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&display=swap" rel="stylesheet">
+<style>
+  :root { --paper:#f4f6f9; --grid:#dce3ee; --ink:#1b2230; --muted:#5b6577; --blue:#2552c9; --green:#13795b; --sticky:#ffe76a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Atkinson Hyperlegible', system-ui, sans-serif; color: var(--ink); font-size: 18px; line-height: 1.5;
+    background: var(--paper) linear-gradient(var(--grid) 1px, transparent 1px) -1px -1px / 40px 40px,
+                linear-gradient(90deg, var(--grid) 1px, transparent 1px) -1px -1px / 40px 40px; }
+  main { max-width: 1120px; margin: 0 auto; padding: 64px 28px 80px; }
+  h1 { font: 800 clamp(44px, 7vw, 80px)/0.95 'Bricolage Grotesque', sans-serif; letter-spacing: -0.03em; margin: 0 0 16px; }
+  .lede { max-width: 60ch; color: var(--muted); font-size: 20px; margin: 0 0 48px; }
+  .lectures { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 32px; }
+  section { background: #fff; border: 2px solid var(--ink); border-radius: 4px; padding: 28px; }
+  .num { font: 800 64px/1 'Bricolage Grotesque', sans-serif; color: var(--blue); }
+  h2 { font: 800 30px/1.1 'Bricolage Grotesque', sans-serif; margin: 8px 0 6px; letter-spacing: -0.01em; }
+  section > p { margin: 0 0 22px; color: var(--muted); }
+  a.slides { display: block; background: var(--sticky); color: var(--ink); text-decoration: none; padding: 20px 22px; margin-bottom: 18px;
+    transform: rotate(-0.8deg); box-shadow: 0 10px 18px -10px rgb(27 34 48 / 0.45); transition: transform .15s; }
+  a.slides:hover, a.slides:focus-visible { transform: rotate(0deg) translateY(-2px); }
+  a.slides b { display: block; font: 800 26px 'Bricolage Grotesque', sans-serif; }
+  ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  ol a { display: block; padding: 14px 16px; border: 2px solid var(--grid); border-radius: 4px; color: var(--ink); text-decoration: none; }
+  ol a:hover, ol a:focus-visible { border-color: var(--blue); }
+  ol a b { color: var(--blue); }
+  ol a span { display: block; color: var(--muted); font-size: 16px; }
+  h3 { font: 800 26px 'Bricolage Grotesque', sans-serif; margin: 56px 0 14px; }
+  .kit { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+  .kit a { background: #fff; }
+  .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+  .gallery figure { margin: 0; background: #fff; border: 2px solid var(--grid); border-radius: 4px; padding: 8px; }
+  .gallery img { width: 100%; aspect-ratio: 16/10; object-fit: cover; object-position: top; display: block; }
+  .gallery figcaption { font-size: 15px; padding: 6px 2px 0; display: flex; justify-content: space-between; gap: 8px; }
+  .gallery figcaption a { color: var(--blue); }
+  .install { margin-bottom: 20px; }
+  .install h4 { font: 800 21px 'Bricolage Grotesque', sans-serif; margin: 28px 0 6px; }
+  .install h4:first-child { margin-top: 0; }
+  .install .steps { display: block; list-style: decimal; padding-left: 1.4em; margin: 0 0 14px; }
+  .install .steps li::marker { font-weight: 700; color: var(--blue); } .install .steps li { margin-bottom: 12px; }
+  .os { display: grid; grid-template-columns: 1fr 1fr; gap: 0 28px; }
+  .os h5 { font: 700 17px 'Bricolage Grotesque', sans-serif; margin: 6px 0 4px; }
+  @media (max-width: 760px) { .os { grid-template-columns: 1fr; } }
+  .install code { font-size: 0.9em; background: #e8ecf3; padding: 1px 5px; border-radius: 3px; }
+  .cmdwrap { position: relative; margin: 8px 0 6px; }
+  pre.cmd { background: var(--ink); color: #fff; padding: 16px 18px; padding-right: 90px; border-radius: 4px; overflow-x: auto; margin: 0; font-size: 15px; }
+  pre.cmd code { background: none; padding: 0; }
+  .copy { position: absolute; top: 10px; right: 10px; font: 700 14px 'Atkinson Hyperlegible'; padding: 6px 12px; border-radius: 4px; border: 0; background: var(--sticky); color: var(--ink); cursor: pointer; }
+  .fail { margin: 0 0 8px; padding: 14px 18px; background: var(--sticky); transform: rotate(-0.4deg); }
+  .install .steps a, details a { display: inline; padding: 0; border: 0; color: var(--blue); text-decoration: underline; }
+  details { margin: 6px 0 14px; }
+  summary { cursor: pointer; font-weight: 700; color: var(--blue); }
+  footer { margin-top: 56px; color: var(--muted); font-size: 16px; }
+  a:focus-visible, summary:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { a.slides { transition: none; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Docker</h1>
+  <p class="lede">Why "it works on my machine" stops mattering. Run your first containers, then write a Dockerfile, build your own images, look inside them, clean up after them, and automate it all. Bring a laptop with Docker installed: these lectures happen in your terminal. Everything opens in a new tab, so keep this page open as your home base.</p>
+
+  <div class="lectures">
+    <section>
+      <div class="num">1</div>
+      <h2>Introduction to Docker</h2>
+      <p>What a container is, containers vs virtual machines, Docker Hub and tags, and four habits of a good container. You run hello-world, step inside Alpine, and get the same Python as everyone else.</p>
+      <a class="slides" href="lecture-1-intro-to-docker/slides.html" target="_blank" rel="noopener"><b>Open the slides</b>Arrow keys to move, F for fullscreen</a>
+      <ol>
+        <li><a href="lecture-1-intro-to-docker/terminal-lab/" target="_blank" rel="noopener"><b>Terminal Lab 1</b><span>Every command from the lecture with Copy buttons, what you should see, and a "when something breaks" table.</span></a></li>
+        <li><a href="lecture-1-intro-to-docker/activity-habit-or-trap/" target="_blank" rel="noopener"><b>Activity: Habit or Trap?</b><span>Maria and Sam's team makes Docker decisions. Good habit, or a trap?</span></a></li>
+      </ol>
+    </section>
+    <section>
+      <div class="num">2</div>
+      <h2>Leveraging Docker</h2>
+      <p>Dockerfile → image → container. Build hello-docker and file-demo, look inside, clean up containers and images, connect your files with a bind mount, and automate it with run.sh.</p>
+      <a class="slides" href="lecture-2-leveraging-docker/slides.html" target="_blank" rel="noopener"><b>Open the slides</b>Arrow keys to move, F for fullscreen</a>
+      <ol>
+        <li><a href="lecture-2-leveraging-docker/terminal-lab/" target="_blank" rel="noopener"><b>Terminal Lab 2</b><span>Eight steps: write, build, run, inspect, clean up, bind mount, run.sh. With Copy buttons and expected output.</span></a></li>
+        <li><a href="lecture-2-leveraging-docker/activity-which-command/" target="_blank" rel="noopener"><b>Activity: Which Command?</b><span>A situation in your terminal. build, run, ps -a, rm, rm -f, rmi or --rm?</span></a></li>
+        <li><a href="https://github.com/kabeier/intro-docker/tree/main/demo-kit/lecture2-demo" target="_blank" rel="noopener"><b>The finished lecture folder</b><span>Dockerfile, message.txt and run.sh, exactly as they end up in class.</span></a></li>
+      </ol>
+    </section>
+  </div>
+
+  <h3 id="homework">Homework Part I: introduction to Docker</h3>
+  <section class="install">
+    <p><b>In this order:</b> (1) <b>Terminal Lab 1</b> on your own laptop, (2) the <b>Docker Hub tour</b> below, (3) 50 steps of your current <b>FreeCodeCamp</b> certification.</p>
+
+    <h4>1 · Docker works on your laptop</h4>
+    <ol class="steps">
+      <li>Install Docker: <a href="https://docs.docker.com/desktop/setup/install/mac-install/" target="_blank" rel="noopener">Mac</a> · <a href="https://docs.docker.com/desktop/setup/install/windows-install/" target="_blank" rel="noopener">Windows</a> · <a href="https://docs.docker.com/engine/install/" target="_blank" rel="noopener">Linux</a>. On Mac and Windows, open Docker Desktop and wait until it's running.</li>
+      <li>Check it:
+        <div class="cmdwrap"><pre class="cmd"><code>docker version
+docker run --rm hello-world</code></pre><button type="button" class="copy">Copy</button></div>
+        You need a <b>Server</b> section and "Hello from Docker!".
+        <p class="fail"><b>If this breaks:</b> "Cannot connect to the Docker daemon" = Docker Desktop isn't running. More fixes in <a href="lecture-1-intro-to-docker/terminal-lab/#breaks" target="_blank" rel="noopener">Terminal Lab 1</a>.</p></li>
+      <li>Do every step of <a href="lecture-1-intro-to-docker/terminal-lab/" target="_blank" rel="noopener">Terminal Lab 1</a>, until this prints Python 3.12:
+        <div class="cmdwrap"><pre class="cmd"><code>docker run --rm python:3.12-slim python --version</code></pre><button type="button" class="copy">Copy</button></div></li>
+    </ol>
+
+    <h4>2 · Docker Hub tour: node</h4>
+    <ol class="steps">
+      <li>Open <a href="https://hub.docker.com/_/node" target="_blank" rel="noopener">hub.docker.com/_/node</a>. Find: the <b>Official Image</b> badge, the <b>Tags</b> tab, a <code>-slim</code> or <code>-alpine</code> tag and its size, and the pull command.</li>
+      <li>Pick a pinned, small tag (for example <code>node:22-alpine</code>) and run Node without installing it:
+        <div class="cmdwrap"><pre class="cmd"><code>docker run --rm node:22-alpine node --version</code></pre><button type="button" class="copy">Copy</button></div></li>
+      <li>Then answer for yourself: why <code>node:22-alpine</code> and not <code>node:latest</code>? (Lecture 1, "latest ≠ stable".)</li>
+    </ol>
+  </section>
+
+  <h3>Homework Part II: Docker Fundamentals</h3>
+  <section class="install">
+    <p><b>In this order:</b> (1) the <a href="https://github.com/Code-Platoon-Assignments/docker-fundamentals" target="_blank" rel="noopener"><b>Docker Fundamentals assignment</b></a>: Tasks 1–4 and the resource checklist, steps 3–6 below, (2) 50 steps of your current <b>FreeCodeCamp</b> certification. Assignments go top to bottom: each task is a little harder.</p>
+
+    <h4>3 · Set up the folders</h4>
+    <ol class="steps">
+      <li>Read the assignment's README. Then make its suggested folder structure:
+        <div class="cmdwrap"><pre class="cmd"><code>mkdir docker-assignment
+cd docker-assignment
+mkdir task-1-hello task-2-file-read task-3-env-vars task-4-script
+git init</code></pre><button type="button" class="copy">Copy</button></div></li>
+      <li>Each task gets its own <code>Dockerfile</code>. Build from inside the task's folder, and always run with <code>--rm</code>.</li>
+    </ol>
+
+    <h4>4 · Tasks 1–4</h4>
+    <ol class="steps">
+      <li><b>Task 1, one-off command:</b> like <code>hello-docker</code> (Lab 2, steps 1–2), with your own message. Run with <code>--rm</code>, then <code>docker ps -a</code> shows no stopped container.</li>
+      <li><b>Task 2, read a file:</b> like <code>file-demo</code> (Lab 2, step 3): <code>WORKDIR</code>, <code>COPY</code>, print it.</li>
+      <li><b>Task 3, environment variables:</b> <code>ENV NAME="value"</code> sets one. Printing it needs a shell, because the list form of <code>CMD</code> doesn't swap variables in: <code>CMD ["echo", "$NAME"]</code> prints <code>$NAME</code>. Stretch: override it with <code>docker run --rm -e NAME="other" your-image</code>.</li>
+      <li><b>Task 4, a script:</b> COPY a <code>.sh</code> (base <code>alpine</code>) or <code>.py</code> (base <code>python:3.12-slim</code>) script in, and run it with its interpreter (<code>sh</code> or <code>python</code>).
+        <p class="fail"><b>If this breaks:</b> <code>exec: "./hello.sh": permission denied</code> = the script isn't executable. Run it as <code>sh hello.sh</code>, or <code>chmod +x</code> it before you build.</p></li>
+    </ol>
+
+    <h4>5 · The resource checklist</h4>
+    <ol class="steps">
+      <li>Show each one in your terminal: <code>docker ps</code> · <code>docker ps -a</code> · <code>docker rm</code> a stopped container · <code>docker images</code> · <code>docker rmi</code> an unused image.</li>
+      <li>Answer in a <code>README.md</code> in <code>docker-assignment/</code>:
+        <ul>
+          <li>Why don't stopped containers appear with <code>docker ps</code>?</li>
+          <li>Why can't an image be deleted if a container depends on it?</li>
+          <li>What does the <code>--rm</code> flag prevent?</li>
+        </ul></li>
+    </ol>
+
+    <h4>6 · Commit and push</h4>
+    <ol class="steps">
+      <li>Create an empty repo called <code>docker-assignment</code> on GitHub (no README), then:
+        <div class="cmdwrap"><pre class="cmd"><code>git add -A
+git commit -m "Docker fundamentals: tasks 1-4 and checklist"
+git branch -M main
+git remote add origin https://github.com/YOUR-USERNAME/docker-assignment.git
+git push -u origin main</code></pre><button type="button" class="copy">Copy</button></div>
+        <b>Or ask Claude</b> (in <code>docker-assignment/</code>):
+        <div class="cmdwrap"><pre class="cmd" style="white-space:pre-wrap"><code>Run git status and show me the list of files. Then suggest a commit message for my Docker fundamentals tasks and wait for my approval. After I approve, commit, and push to https://github.com/YOUR-USERNAME/docker-assignment.git on the main branch.</code></pre><button type="button" class="copy">Copy</button></div>
+        Claude asks before each git command. Read the file list before you say yes.
+        <p class="fail"><b>If this breaks:</b> "remote origin already exists" → <code>git remote set-url origin &lt;url&gt;</code>. "src refspec main does not match any" → you haven't committed yet.</p></li>
+      <li>Submit the repo link the way your instructor asks.</li>
+    </ol>
+  </section>
+
+  <ol class="kit">
+    <li><a href="https://github.com/kabeier/intro-docker/blob/main/demo-kit/RUNBOOK.md" target="_blank" rel="noopener"><b>Runbook</b><span>Before class, per-slide Do/Say, time checks.</span></a></li>
+    <li><a href="https://github.com/kabeier/intro-docker/blob/main/demo-kit/prompts.md" target="_blank" rel="noopener"><b>Commands and prompts</b><span>Every command in order, plus the "Or ask Claude" prompts.</span></a></li>
+    <li><a href="https://github.com/kabeier/intro-docker/tree/main/demo-kit/lecture2-demo" target="_blank" rel="noopener"><b>lecture2-demo/</b><span>The finished Dockerfile, message.txt and run.sh.</span></a></li>
+    <li><a href="https://codeplatoon.github.io/se-curriculum/phase-I/01-Fundamentals/1-docker/" target="_blank" rel="noopener"><b>The curriculum</b><span>Docker overview, both lessons and the assignments page.</span></a></li>
+  </ol>
+
+  <h3>Diagrams</h3>
+  <div class="gallery" id="gallery"></div>
+
+  <footer>Want to edit a diagram? Download its .tldr file and drag it onto <a href="https://www.tldraw.com" target="_blank" rel="noopener">tldraw.com</a>. Earlier lectures: <a href="https://kabeier.github.io/SPAs-and-Claude/" target="_blank" rel="noopener">SPAs and Claude</a> · <a href="https://kabeier.github.io/Databases-and-Supabase/" target="_blank" rel="noopener">Databases and Supabase</a> · <a href="https://kabeier.github.io/Claude-and-full-stack-apps/" target="_blank" rel="noopener">Full-Stack Apps</a> · <a href="https://kabeier.github.io/Claude-and-auth/" target="_blank" rel="noopener">Authentication</a>.</footer>
+</main>
+<script>
+  document.querySelectorAll('.copy').forEach((b) => b.onclick = async () => {
+    await navigator.clipboard.writeText(b.previousElementSibling.innerText.trim()); b.textContent = 'Copied'; setTimeout(() => (b.textContent = 'Copy'), 1500)
+  })
+  const DIAGRAMS = [
+    ['DK1-01-whats-inside', 'What a container carries'], ['DK1-02-machine-container-vm', 'Machine, container, VM'],
+    ['DK1-03-modern-stack', 'One image, every step'], ['DK1-04-docker-hub', 'Where images come from'],
+    ['DK2-01-pipeline', 'Dockerfile → image → container'], ['DK2-02-container-state', 'Each line adds to the image'],
+    ['DK2-03-cleanup', 'Cleaning up, in order'], ['DK2-04-copy-vs-mount', 'COPY vs a bind mount'],
+  ]
+  document.getElementById('gallery').innerHTML = DIAGRAMS.map(([f, t]) => `
+    <figure><a href="diagrams/${f}.png" target="_blank" rel="noopener"><img src="diagrams/${f}.png" alt="${t}" loading="lazy"></a>
+    <figcaption>${t}<a href="diagrams/${f}.tldr" download>.tldr</a></figcaption></figure>`).join('')
+</script>
+</body>
+</html>

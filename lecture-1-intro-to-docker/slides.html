@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 1 · Introduction to Docker</title>
+<link rel="stylesheet" href="../shared/deck.css">
+<style>
+  pre .p { color: #ffe76a; }
+  pre .o { color: #9fe3b8; }
+  pre.term { font-size: 21px; line-height: 1.4; padding: 22px 26px; }
+  .lab { display: inline-block; align-self: flex-start; width: fit-content; font: 600 20px var(--mono); padding: 4px 12px; border-radius: 6px; background: var(--green); color: #fff; margin-bottom: 14px; }
+  .labref { font-size: 20px; color: var(--muted, #5b6577); margin-top: 10px; }
+  .card.tight p, .card.tight li { font-size: 23px; margin: 0 0 8px; }
+  .card.tight h3 { font-size: 27px; margin: 0 0 10px; }
+</style>
+</head>
+<body data-minutes="40">
+<div class="stage">
+
+<!-- ============ OPEN (0–3) ============ -->
+<section class="slide title" data-seg="Open" data-at="0">
+  <div class="kicker">Fundamentals · Docker · Part 1 of 2</div>
+  <h1>Introduction to Docker</h1>
+  <p class="sub">Why does code that works on one laptop crash on another, and how do containers fix it? Laptops open: today is hands-on.</p>
+  <aside class="notes">
+    <p><b>Before class</b> (demo-kit/RUNBOOK.md): Docker Desktop running, <code>docker version</code> shows a <b>Server</b> section. Pre-pull <code>alpine</code>, <code>hello-world</code>, <code>python:3.12-slim</code>, <code>python:3.12-alpine</code> with <code>demo-kit/pre-pull.sh</code>.</p>
+    <p>Tabs: this deck, <b>Terminal Lab 1</b> page, the activity page, <b>hub.docker.com/_/python</b>. Terminal font big (Cmd/Ctrl +).</p>
+    <p>Say: "Everyone open a terminal now. You'll type along all lecture. The lab page on the class site has every command with a Copy button." Press <b>T</b>.</p>
+  </aside>
+</section>
+
+<section class="slide statement" data-seg="Open" data-at="1">
+  <h2>"It works on my machine"</h2>
+  <ul>
+    <li>Type <code>python3 --version</code> (Windows: <code>python --version</code>)</li>
+    <li>Paste the answer in chat</li>
+    <li>Same class, same lesson… how many different answers?</li>
+  </ul>
+  <p class="bottomline">Every laptop is different. Docker makes the environment the same everywhere.</p>
+  <aside class="notes">
+    <p><b>** LIVE, 2 minutes. **</b> Run it in your own terminal first. (Instructor laptop answered <code>Python 3.14.7</code> in the dry run.)</p>
+    <p>Read out the spread from chat: 3.11, 3.12, 3.13, "command not found"… "If we all ran the same Python project, some of us would crash. That's the problem Docker solves."</p>
+    <p>Keep it light: nobody's version is "wrong".</p>
+  </aside>
+</section>
+
+<!-- ============ WHAT AND WHY (3–11) ============ -->
+<section class="slide diagram" data-seg="What is Docker?" data-at="3">
+  <img src="../diagrams/DK1-01-whats-inside.png" alt="Maria's laptop runs macOS with Python 3.14 and says it works on my machine. Sam's laptop runs Windows with Python 3.11 and says it crashes on mine. Between them one container holds the application code, the runtime Python 3.12, system libraries and dependencies, and configuration and environment variables. Both laptops run the same container.">
+  <div class="src">diagrams/DK1-01-whats-inside.tldr</div>
+  <aside class="notes">
+    <p>"Docker is a platform that packages an app <b>and everything it needs</b> into a standard unit: a <b>container</b>."</p>
+    <ul>
+      <li>A container holds: the <b>code</b>, the <b>runtime</b> (Python, Node), the <b>libraries</b>, the <b>configuration</b>.</li>
+      <li>Maria and Sam don't have to match each other. They both just run the container.</li>
+      <li>Containers are created, run and deleted by <b>Docker</b> only.</li>
+    </ul>
+    <p>Curriculum's key idea: "Docker makes 'it works on my machine' irrelevant."</p>
+  </aside>
+</section>
+
+<section class="slide" data-seg="What is Docker?" data-at="5">
+  <h2>Why was Docker created?</h2>
+  <div class="cols">
+    <div class="card red tight">
+      <h3>Before Docker</h3>
+      <ul>
+        <li>Different OS versions across the team</li>
+        <li>Different dependency versions</li>
+        <li>Long setup instructions</li>
+        <li>Production behaves differently from your laptop</li>
+      </ul>
+      <p class="muted">= time and money spent on environment bugs, fragile deploys, slow onboarding</p>
+    </div>
+    <div class="card green tight">
+      <h3>With Docker</h3>
+      <ul>
+        <li>The environment is written as <b>code</b></li>
+        <li>A new teammate gets it in <b>seconds</b></li>
+        <li>It's <b>portable</b>: the same on every laptop and on the server</li>
+      </ul>
+    </div>
+  </div>
+  <p class="bottomline">Docker turns "set up your machine" into "run this one thing".</p>
+  <aside class="notes">
+    <p>Ask chat: "Who has lost an hour (or a day) to installing something?" Lots of hands.</p>
+    <p>"Environment as code": you'll write that code, a Dockerfile, in Lecture 2.</p>
+  </aside>
+</section>
+
+<section class="slide diagram" data-seg="Containers vs VMs" data-at="7">
+  <img src="../diagrams/DK1-02-machine-container-vm.png" alt="Three columns. My local machine runs the whole operating system with everything you ever installed, unique to you and hard to copy. Containers: app A and app B each with only what they need, on the Docker Engine, sharing one host OS kernel, megabytes, starting in seconds. Virtual machines: app A and app B each with their own full OS on virtual hardware, gigabytes, starting in minutes. VMs virtualize hardware, containers virtualize applications.">
+  <div class="src">diagrams/DK1-02-machine-container-vm.tldr</div>
+  <aside class="notes">
+    <ul>
+      <li><b>Your machine:</b> the OS manages your <i>entire</i> computer, not just one project. Unique to you.</li>
+      <li><b>A container:</b> lives inside your machine, inside the Docker background service. Only what one task needs, with pinned versions. Faster because it carries less.</li>
+      <li><b>A VM</b> (you may know WSL on Windows): a whole pretend computer with its own OS.</li>
+    </ul>
+    <p>Key mental model, word for word: "A Docker container is a minimal, disposable environment created and run by Docker to execute a specific task using the host machine's operating system."</p>
+    <p><b>If asked about Mac/Windows:</b> Docker Desktop quietly runs one small Linux VM, and all containers share <i>its</i> kernel. Still one kernel for all containers.</p>
+  </aside>
+</section>
+
+<section class="slide" data-seg="Containers vs VMs" data-at="9">
+  <h2>Containers are isolated processes, not mini computers</h2>
+  <table class="dbt">
+    <tr><th></th><th>Containers</th><th>Virtual machines</th></tr>
+    <tr><td><b>OS</b></td><td class="pk">share the host OS kernel</td><td>each has its own OS</td></tr>
+    <tr><td><b>Size</b></td><td>lightweight (MBs)</td><td>heavy (GBs)</td></tr>
+    <tr><td><b>Startup</b></td><td>seconds or less</td><td>minutes</td></tr>
+    <tr><td><b>Resources</b></td><td>low</td><td>high</td></tr>
+    <tr><td><b>Portability</b></td><td>very high</td><td>moderate</td></tr>
+  </table>
+  <p class="bottomline">VMs virtualize hardware. Containers virtualize applications.</p>
+  <aside class="notes">
+    <p>Don't go deep: the curriculum says "we aren't going to go much into detail". 1 minute.</p>
+    <p>"In two minutes you'll prove the 'isolated process' part yourself."</p>
+  </aside>
+</section>
+
+<!-- ============ HANDS-ON 1 + 2 (11–18) ============ -->
+<section class="slide" data-seg="Your terminal: is Docker working?" data-at="11">
+  <span class="lab">YOUR TERMINAL · Lab step 1</span>
+  <h2>Is Docker working?</h2>
+  <div class="cols wide-left">
+<pre class="term"><span class="p">$</span> docker version
+<span class="o">Client: …
+ Version:   29.x
+Server: …              </span><span class="c">← the Docker Engine</span>
+<span class="o"> Engine:
+  Version:  29.x</span>
+
+<span class="p">$</span> docker run hello-world
+<span class="o">Unable to find image 'hello-world:latest' locally
+latest: Pulling from library/hello-world
+…
+Hello from Docker!
+This message shows that your installation
+appears to be working correctly.</span></pre>
+    <div class="card blue tight">
+      <h3>Look for</h3>
+      <p><b>Client</b> = the <code>docker</code> command you type</p>
+      <p><b>Server</b> = the Docker Engine, the background service that runs containers</p>
+      <h3 style="margin-top:18px">No Server section?</h3>
+      <p>"Cannot connect to the Docker daemon" → open <b>Docker Desktop</b> and wait for it to say running.</p>
+    </div>
+  </div>
+  <p class="labref">Every command is on the class site: Terminal Lab 1, with Copy buttons.</p>
+  <aside class="notes">
+    <p><b>** HANDS-ON, about 3 minutes. **</b> Type it on your screen first, then "your turn". Thumbs up in chat when you see "Hello from Docker!".</p>
+    <ul>
+      <li><code>docker version</code> = the curriculum's install check. Point at <b>Client</b> and <b>Server</b>.</li>
+      <li><code>docker run hello-world</code>: read Docker's own 4 steps aloud ("The Docker client contacted the Docker daemon… pulled the image from the Docker Hub… created a new container… streamed that output"). That's the whole lecture in 4 lines.</li>
+      <li>"Unable to find image locally" is <b>not an error</b>: it downloads it. Remember it for slide 11.</li>
+    </ul>
+    <p><b>Stuck students:</b> don't fix installs live. "Watch my screen, and do Lab step 1 after class; the lab page has a 'When something breaks' table." Common: Docker Desktop not open; Windows needs WSL 2; Linux needs <code>sudo</code> or the <code>docker</code> group.</p>
+  </aside>
+</section>
+
+<section class="slide" data-seg="Your terminal: inside a container" data-at="14">
+  <span class="lab">YOUR TERMINAL · Lab step 2</span>
+  <h2>Step inside a container</h2>
+  <div class="cols wide-left">
+<pre class="term"><span class="p">$</span> docker run --rm alpine cat /etc/os-release
+<span class="o">NAME="Alpine Linux"
+VERSION_ID=3.24.2</span>         <span class="c">← not your OS!</span>
+
+<span class="p">$</span> docker run -it --rm alpine sh
+<span class="p">/ #</span> whoami
+<span class="o">root</span>
+<span class="p">/ #</span> ls /
+<span class="o">bin  dev  etc  home  lib  … usr  var</span>
+<span class="p">/ #</span> ps
+<span class="o">PID   USER     TIME  COMMAND
+    1 root      0:00 sh
+    7 root      0:00 ps</span>
+<span class="p">/ #</span> exit</pre>
+    <div class="card green tight">
+      <h3>What you just saw</h3>
+      <p>A tiny Linux (Alpine, about 8 MB) on <b>your</b> laptop</p>
+      <p><code>ps</code>: only <b>2</b> processes. Your laptop runs hundreds. That's isolation.</p>
+      <p><code>-it</code> = let me type into it</p>
+      <p><code>--rm</code> = delete it when I exit</p>
+    </div>
+  </div>
+  <p class="bottomline">A container is an isolated process, not a mini computer.</p>
+  <aside class="notes">
+    <p><b>** HANDS-ON, about 4 minutes. **</b></p>
+    <ul>
+      <li>First command: Alpine Linux, even on a Mac or Windows laptop. (Dry run host: Fedora. Inside: Alpine 3.24.2. Their version number may differ a little.)</li>
+      <li>Second: the prompt changes to <code>/ #</code>: "You're inside." <code>whoami</code> = root, but only root of this little box.</li>
+      <li><code>ps</code>: PID 1 is <code>sh</code>, the command we started. "The container IS that process. When it ends, the container stops."</li>
+      <li><code>exit</code>, then show <code>docker ps -a</code> is empty for alpine: <code>--rm</code> cleaned it up. (Lecture 2 is all about cleaning up.)</li>
+    </ul>
+    <p><b>Windows Git Bash</b> may say "the input device is not a TTY": run it as <code>winpty docker run -it --rm alpine sh</code>, or use PowerShell.</p>
+  </aside>
+</section>
+
+<!-- ============ WHERE IT FITS (18–22) ============ -->
+<section class="slide diagram" data-seg="Docker at work" data-at="18">
+  <img src="../diagrams/DK1-03-modern-stack.png" alt="The same image moves from your laptop, where you build and run while you code, to CI/CD in GitHub Actions, where it is built and tested, to the cloud on AWS, GCP or Azure, and at scale to Kubernetes running hundreds of containers. One container per job: a front end from a node image, a back end from a python image, a database from a postgres image.">
+  <div class="src">diagrams/DK1-03-modern-stack.tldr</div>
+  <aside class="notes">
+    <ul>
+      <li>The <b>same environment</b> from development through testing and production: that's why deploys get reliable.</li>
+      <li><b>CI/CD</b>: you'll meet GitHub Actions later in Fundamentals; it builds and tests in containers.</li>
+      <li>Backends (Django, Node, Rails), front-end tooling and databases are all commonly containerized.</li>
+      <li><b>Kubernetes</b> = a tool that manages lots of containers at scale. Name only.</li>
+    </ul>
+    <p>"In professional environments Docker is rarely optional. It's a baseline expectation."</p>
+  </aside>
+</section>
+
+<section class="slide" data-seg="Docker at work" data-at="20">
+  <h2>Four habits of a good container</h2>
+  <div class="grid2x4">
+    <div class="card blue"><b>1 · SMALL</b><p>builds faster, more secure, fewer dependencies = fewer problems</p></div>
+    <div class="card blue"><b>2 · ONE JOB</b><p>one app or service per container, never "everything in one"</p></div>
+    <div class="card blue"><b>3 · DISPOSABLE</b><p>easy to destroy and recreate; don't rely on what's inside it</p></div>
+    <div class="card blue"><b>4 · CONFIGURED</b><p>environment variables, not hard-coded values</p></div>
+  </div>
+  <p class="bottomline">If rebuilding your container is painful, your Docker setup needs improvement.</p>
+  <aside class="notes">
+    <ul>
+      <li><b>Small:</b> you'll see real sizes in 10 minutes (8 MB vs 1 GB).</li>
+      <li><b>One job:</b> the picture before: front end, back end, database = 3 containers.</li>
+      <li><b>Disposable:</b> we already did it: <code>--rm</code> threw the Alpine container away.</li>
+      <li><b>Configured:</b> passwords and URLs come from env variables. Homework Task 3 uses one.</li>
+    </ul>
+    <p>These four are the activity's answers, so say them clearly.</p>
+  </aside>
+</section>
+
+<!-- ============ DOCKER HUB (22–26) ============ -->
+<section class="slide diagram" data-seg="Docker Hub" data-at="22">
+  <img src="../diagrams/DK1-04-docker-hub.png" alt="docker run python: Docker first checks whether the image is on my machine. If yes, it runs a container. If no, it says unable to find image locally and pulls it from Docker Hub, GitHub for Docker images, saves it, then runs. Official images like python, node, postgres, nginx and redis are maintained, patched and documented. Random community images may be outdated, insecure or badly configured.">
+  <div class="src">diagrams/DK1-04-docker-hub.tldr</div>
+  <aside class="notes">
+    <p>"Docker doesn't magically know what 'python' is." Callback: hello-world said "Unable to find image locally" → pulled it. Run it again: no download.</p>
+    <ul>
+      <li><b>Docker Hub</b> = GitHub for Docker images; a marketplace of prebuilt environments; Docker's default source.</li>
+      <li>"Without Docker Hub, every developer would build every image from scratch."</li>
+      <li><b>Official images</b>: maintained by Docker or the software's own team, security updates, clear docs. "Always start with an official image unless you have a very specific reason not to."</li>
+    </ul>
+    <p><b>Don't type</b> plain <code>docker run python</code> on class Wi-Fi: it pulls 1.1 GB and then prints nothing (no <code>-it</code>, so Python exits at once). We'll use a smaller tag.</p>
+  </aside>
+</section>
+
+<section class="slide" data-seg="Docker Hub" data-at="24">
+  <h2>Reading an image page: hub.docker.com/_/python</h2>
+  <div class="cols">
+    <div class="card blue tight">
+      <h3>Look for</h3>
+      <p><b>Official Image</b> badge</p>
+      <p><b>Tags</b> = versions: <code>3.12</code> · <code>3.12-slim</code> · <code>3.12-alpine</code></p>
+      <p><b>Docs</b>: how it's meant to be used</p>
+      <p><b>Size</b>: smaller = faster, safer</p>
+      <p><b>Pull command</b>: <code>docker pull python:3.12-slim</code></p>
+    </div>
+    <div class="card red tight">
+      <h3><code>latest</code> ≠ stable</h3>
+      <p><code>latest</code> just means "newest tag". Tomorrow it can be a different version.</p>
+      <p><b>Pin the version:</b> <code>FROM python:3.12-slim</code>, not <code>FROM python</code></p>
+      <h3 style="margin-top:16px">Start the downloads now</h3>
+<pre class="term" style="font-size:19px;padding:14px 18px"><span class="p">$</span> docker pull python:3.12-slim
+<span class="p">$</span> docker pull python:3.12-alpine</pre>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>** LIVE, 2 minutes. **</b> Browser: <b>hub.docker.com/_/python</b>. Point at: Docker Official Image badge → the <b>Tags</b> tab → <code>3.12-slim</code> and <code>3.12-alpine</code> → the compressed size column → the pull command with its copy button.</p>
+    <p>"Engineers spend far more time choosing and configuring existing images than creating new ones."</p>
+    <p><b>Then:</b> "Paste both pull commands now. They download while we do the activity." (About 175 MB together. If Wi-Fi is slow, alpine alone is ~20 MB compressed.) Go straight to the activity.</p>
+  </aside>
+</section>
+
+<!-- ============ ACTIVITY (26–32) ============ -->
+<section class="slide activity" data-seg="Activity: Habit or trap?" data-at="26">
+  <h2>Activity: Habit or trap?</h2>
+  <div class="countdown" data-sec="360"></div>
+  <ol class="steps">
+    <li>A Docker decision appears (Maria and Sam's team)</li>
+    <li>In chat on "go": <b>HABIT</b> or <b>TRAP</b></li>
+    <li>Then: which of the four habits, or which slide, says so?</li>
+  </ol>
+  <p class="muted small" style="margin-top:24px">Page: activity-habit-or-trap/ · your pulls keep downloading meanwhile</p>
+  <aside class="notes">
+    <p>About 30 seconds a card; the first 6 are the core set. Space reveals; click the button chat voted for most to show right/wrong.</p>
+    <p>Card 7 is the sizes we'll see next (slim 119 MB vs full 1.11 GB). Card 10 is a bonus.</p>
+    <p>Answers are also in your Notes ("Docker Lectures - Teacher Guide").</p>
+  </aside>
+</section>
+
+<!-- ============ HANDS-ON 3 (32–37) ============ -->
+<section class="slide" data-seg="Your terminal: same Python everywhere" data-at="32">
+  <span class="lab">YOUR TERMINAL · Lab steps 3 + 4</span>
+  <h2>Same image, same Python, on every laptop</h2>
+  <div class="cols wide-left">
+<pre class="term" style="font-size:19px"><span class="p">$</span> docker images
+<span class="o">IMAGE                ID            DISK USAGE
+alpine:latest        320994c3b997     8.42MB
+python:3.12          720762d97dcd     1.11GB</span>  <span class="c">← instructor</span>
+<span class="o">python:3.12-alpine   979e5a8a5684     55.2MB
+python:3.12-slim     df18428df8a0      119MB</span>
+
+<span class="p">$</span> docker run --rm python:3.12-slim python --version
+<span class="o">Python 3.12.15</span>      <span class="c">← everyone gets this</span>
+
+<span class="p">$</span> docker run -it --rm python:3.12-slim python
+<span class="o">&gt;&gt;&gt;</span> print("hello from a container")
+<span class="o">&gt;&gt;&gt;</span> exit()</pre>
+    <div class="card green tight">
+      <h3>Compare</h3>
+      <p>Your laptop: whatever you pasted in chat at the start</p>
+      <p>The container: <b>Python 3.12.15</b> for everyone in the room</p>
+      <p>Full image <b>1.11 GB</b> vs slim <b>119 MB</b> vs alpine <b>55 MB</b>: same Python, 20× smaller</p>
+    </div>
+  </div>
+  <p class="bottomline">Nobody installed Python 3.12. Docker pulled an environment and ran it.</p>
+  <aside class="notes">
+    <p><b>** HANDS-ON, about 4 minutes. **</b></p>
+    <ul>
+      <li><code>docker images</code> lists what's on your machine. Only the instructor has <code>python:3.12</code> (pre-pulled, so we didn't all download 1 GB).</li>
+      <li><b>Older Docker</b> prints <code>REPOSITORY  TAG  IMAGE ID  CREATED  SIZE</code> instead. Same information. Sizes on an M-series Mac differ a little.</li>
+      <li><code>python --version</code> inside: everyone gets the <b>same</b> answer. Compare with the chat at minute 1. That's "it works on my machine" solved.</li>
+      <li>The REPL: a real Python 3.12, nothing installed on the laptop. <code>exit()</code> → <code>--rm</code> deletes the container.</li>
+    </ul>
+    <p><b>Pull still running?</b> They can watch yours, and do Lab steps 3–4 after class.</p>
+  </aside>
+</section>
+
+<!-- ============ WRAP (37–40) ============ -->
+<section class="slide" data-seg="Wrap up" data-at="36">
+  <h2>What you now know</h2>
+  <ul class="small">
+    <li>A <b>container</b> packages code + runtime + libraries + config, so it runs the same everywhere</li>
+    <li>Containers <b>share the host's kernel</b>: isolated processes, MBs, seconds. VMs: own OS, GBs, minutes</li>
+    <li><b>Docker Hub</b> is where images come from. Start from <b>official</b> images and <b>pin the tag</b></li>
+    <li>Good containers are <b>small</b>, have <b>one job</b>, are <b>disposable</b>, and use <b>env variables</b></li>
+    <li>You ran: <code>docker version</code> · <code>docker run</code> · <code>docker pull</code> · <code>docker images</code> · <code>-it</code> · <code>--rm</code></li>
+  </ul>
+  <p class="bottomline">Next lecture: you write the recipe (a Dockerfile), build your own image, and clean up after it.</p>
+  <aside class="notes">
+    <p>"The most important takeaway isn't the commands, it's the mental model: a minimal, disposable environment that borrows your OS."</p>
+  </aside>
+</section>
+
+<section class="slide" data-seg="Wrap up" data-at="38">
+  <h2>Homework, Part I</h2>
+  <ol style="list-style:none;padding-left:0" class="small">
+    <li><b>Priority 1, Terminal Lab 1:</b> every step on your own laptop, until <code>python --version</code> in a container says 3.12</li>
+    <li><b>Priority 2, Docker Hub tour:</b> the <code>node</code> official image. Find its tags, a slim or alpine size, and its pull command. Run <code>node --version</code> in it</li>
+    <li><b>Priority 3, FreeCodeCamp:</b> 50 steps of your current certification</li>
+  </ol>
+  <div class="card green" style="margin-top:28px">
+    <h3>Come to Lecture 2 ready</h3>
+    <p class="small"><code>docker run --rm hello-world</code> must work. Lecture 2 is building your own images, all in the terminal.</p>
+  </div>
+  <aside class="notes">
+    <p>Full steps are on the class site (Homework Part I). The Docker Fundamentals assignment comes after Lecture 2.</p>
+  </aside>
+</section>
+
+</div>
+<script src="../shared/deck.js"></script>
+</body>
+</html>
