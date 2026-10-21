@@ -90,7 +90,7 @@
 </section>
 
 <section class="slide diagram" data-seg="Containers vs VMs" data-at="7">
-  <img src="../diagrams/DK1-02-machine-container-vm.png" alt="Three columns. My local machine runs the whole operating system with everything you ever installed, unique to you and hard to copy. Containers: app A and app B each with only what they need, on the Docker Engine, sharing one host OS kernel, megabytes, starting in seconds. Virtual machines: app A and app B each with their own full OS on virtual hardware, gigabytes, starting in minutes. VMs virtualize hardware, containers virtualize applications.">
+  <img src="../diagrams/DK1-02-machine-container-vm.png" alt="Three columns. My local machine runs the whole operating system with everything you ever installed, unique to you and hard to copy. Containers: container 1 runs app A and container 2 runs app B, each with only what it needs, on the Docker Engine, sharing one host OS kernel, megabytes, starting in seconds. Virtual machines: VM 1 runs app A and VM 2 runs app B, each with its own full OS on virtual hardware, gigabytes, starting in minutes. VMs virtualize hardware, containers virtualize applications.">
   <div class="src">diagrams/DK1-02-machine-container-vm.tldr</div>
   <aside class="notes">
     <ul>
@@ -99,6 +99,7 @@
       <li><b>A VM</b> (you may know WSL on Windows): a whole pretend computer with its own OS.</li>
     </ul>
     <p>Key mental model, word for word: "A Docker container is a minimal, disposable environment created and run by Docker to execute a specific task using the host machine's operating system."</p>
+    <p><b>Instructor note: 2 apps = 2 containers.</b> Container 1 and container 2 are <b>separate</b> containers, one app each. Starting two is just two <code>docker run</code> commands. <b>No Docker Compose needed.</b> Compose only makes it easier to start several containers together and let them talk to each other (a future lecture). The blue outline is the "containers" column, <i>not</i> one big container.</p>
     <p><b>If asked about Mac/Windows:</b> Docker Desktop quietly runs one small Linux VM, and all containers share <i>its</i> kernel. Still one kernel for all containers.</p>
   </aside>
 </section>

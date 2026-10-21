@@ -37,6 +37,7 @@ bash demo-kit/reset.sh           # no leftovers from earlier practice
 | 1 (0) | Deck | Press **T**. Ask everyone to open a terminal | "Laptops open: you'll type along all lecture." |
 | 2 (1) | Terminal | `python3 --version`. Ask chat for theirs | "How many different answers? That's the problem." |
 | 3–6 (3–9) | Deck | Diagrams + table | "A container is an isolated process that borrows your OS." |
+| 5 (7) | Deck | Point at **container 1** and **container 2** | "Two apps = two separate containers. No Compose needed for that." |
 | 7 (11) | Terminal | `docker version`, `docker run hello-world`. Thumbs up in chat | "Client = what you type. Server = the engine that runs containers." |
 | 8 (14) | Terminal | `docker run --rm alpine cat /etc/os-release`, then `docker run -it --rm alpine sh` → `whoami`, `ls /`, `ps`, `exit` | "Two processes. Your laptop runs hundreds. That's isolation." |
 | 9–10 (18–20) | Deck | Modern stack, four habits | "These four habits are the activity's answers." |
