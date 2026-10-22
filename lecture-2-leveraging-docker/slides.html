@@ -279,7 +279,9 @@ Deleted: sha256:b350f29a4f26…</span>
 
 <span class="p">$</span> docker images                        <span class="c"># gone</span></pre>
     <div class="card blue tight">
-      <h3>The rule</h3>
+      <h3><code>rm</code> vs <code>rmi</code></h3>
+      <p><code>docker rm</code> = remove a <b>container</b><br><code>docker rmi</code> = remove an <b>image</b> (the <b>i</b>)</p>
+      <h3 style="margin-top:16px">The rule</h3>
       <p>Images can't be removed while a container depends on them</p>
       <p>Order: <b>stop</b> → <b>remove the container</b> → <b>remove the image</b></p>
       <h3 style="margin-top:16px">Same tag again?</h3>
@@ -289,6 +291,7 @@ Deleted: sha256:b350f29a4f26…</span>
   <aside class="notes">
     <p><b>** HANDS-ON, about 3 minutes. **</b> The IDs and names on their screens differ: read theirs.</p>
     <ul>
+      <li><code>rmi</code> = "remove <b>image</b>". <code>rm</code> was for containers (slide 10). It deletes the image from <b>your laptop</b> only; Docker Hub still has it.</li>
       <li>Read the error slowly: "container <b>2c35…</b> is using its referenced image". Docker is protecting you.</li>
       <li>Then the curriculum's order: <code>docker rm -f container_name</code>, <code>docker rmi image_name</code>.</li>
       <li>We'll rebuild <code>file-demo</code> in 7 minutes, so deleting it is fine.</li>
