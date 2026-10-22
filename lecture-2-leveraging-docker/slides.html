@@ -6,6 +6,15 @@
 <title>Lecture 2 · Leveraging Docker</title>
 <link rel="stylesheet" href="../shared/deck.css">
 <style>
+.namekey { background:#fff8e1; border:2px dashed #b7791f; border-radius:10px; padding:14px 20px; margin-top:20px; }
+.namekey h4 { margin:0 0 6px; font:700 20px var(--mono); color:#8a5a00; }
+.namekey table { border-collapse:collapse; font-size:20px; }
+.slide.diagram .namekey table, .namekey.compact table { font-size:17px; } .slide.diagram .namekey h4, .namekey.compact h4 { font-size:16px; } .slide.diagram .namekey .tip, .namekey.compact .tip { display:none; }
+.namekey.compact { padding:10px 16px; }
+.namekey td { padding:2px 14px 2px 0; }
+.namekey td:first-child { font-family:var(--mono); }
+.namekey .tip { font-size:18px; color:#555; margin:6px 0 0; }
+.slide.diagram .namekey { position:absolute; top:96px; right:100px; width:610px; padding:10px 16px; margin:0; z-index:2; }
   pre .p { color: #ffe76a; }
   pre .o { color: #9fe3b8; }
   pre .e { color: #ff8a80; }
@@ -210,6 +219,15 @@ CMD ["cat", "/app/message.txt"]</pre>
 <!-- ============ MANAGING (16–24) ============ -->
 <section class="slide diagram" data-seg="Cleaning up" data-at="16">
   <img src="../diagrams/DK2-03-cleanup.png" alt="The image hello-docker is used by two containers: stupefied_blackburn, exited, and sleeper, up. docker ps shows only running containers; docker ps -a shows all, stopped too. Step 1: docker rm stupefied_blackburn works because it is stopped; docker rm -f sleeper is needed because it is running. Step 2: docker rmi hello-docker works only when no container uses it. Or never make a mess: docker run --rm removes the container as soon as it exits.">
+  <div class="namekey">
+    <h4>NAME KEY · container → image</h4>
+    <table>
+      <tr><td>stupefied_blackburn</td><td>→ <b>hello-docker</b> (slide 6)</td></tr>
+      <tr><td>affectionate_shaw</td><td>→ <b>file-demo</b> (slide 7)</td></tr>
+      <tr><td>sleeper</td><td>→ <b>hello-docker</b> (our name)</td></tr>
+    </table>
+    <p class="tip">Find yours: <code>docker ps -a</code> → the <b>IMAGE</b> column, then <b>NAMES</b></p>
+  </div>
   <div class="src">diagrams/DK2-03-cleanup.tldr</div>
   <aside class="notes">
     <p>"Docker does <b>not</b> clean up after you. Every build and every run leaves something behind."</p>
@@ -236,18 +254,29 @@ a239a14bf944   hello-docker   …  Exited (0)   stupefied_blackburn</span>
 <span class="p">$</span> docker rm stupefied_blackburn        <span class="c"># use YOUR name</span>
 <span class="o">stupefied_blackburn</span>
 
-<span class="p">$</span> docker run -d --name sleeper alpine sleep 300
+<span class="p">$</span> docker run -d --name sleeper hello-docker sleep 300
 <span class="p">$</span> docker rm sleeper
 <span class="e">Error response from daemon: cannot remove container "sleeper":
 container is running: stop the container before removing
 or force remove</span>
 <span class="p">$</span> docker rm -f sleeper
 <span class="o">sleeper</span></pre>
+    <div>
     <div class="card green tight">
       <h3>Three ways</h3>
       <p><code>docker rm name</code><br>stopped container</p>
       <p><code>docker rm -f name</code><br>running: stop + remove. Use on purpose!</p>
       <p><code>docker run --rm image</code><br>removed as soon as it exits: <b>no mess</b></p>
+    </div>
+    <div class="namekey compact">
+      <h4>NAME KEY · container → image</h4>
+      <table>
+        <tr><td>stupefied_blackburn</td><td>→ <b>hello-docker</b> (slide 6)</td></tr>
+        <tr><td>affectionate_shaw</td><td>→ <b>file-demo</b> (slide 7)</td></tr>
+        <tr><td>sleeper</td><td>→ <b>hello-docker</b> (our name)</td></tr>
+      </table>
+      <p class="tip">Find yours: <code>docker ps -a</code> → the <b>IMAGE</b> column, then <b>NAMES</b></p>
+    </div>
     </div>
   </div>
   <aside class="notes">
@@ -255,7 +284,8 @@ or force remove</span>
     <ul>
       <li><code>docker ps</code> = running only. Ours ran for a split second, so: empty. "Beginners think they're gone. They're not."</li>
       <li><code>docker ps -a</code> = all. Names are random (Docker picks adjective_scientist). <b>Everyone's names are different</b>: use yours. Tab completes them.</li>
-      <li><code>sleeper</code>: <code>-d</code> runs it in the background, <code>sleep 300</code> keeps it alive 5 minutes. Now <code>docker ps</code> shows it as <b>Up</b>.</li>
+      <li><b>Name key</b> (bottom right): random names differ on every laptop. Read <code>docker ps -a</code> left to right: IMAGE tells you which one is which.</li>
+      <li><code>sleeper</code>: <code>-d</code> runs it in the background, <code>sleep 300</code> replaces the image's <code>echo</code> and keeps it alive 5 minutes. Now <code>docker ps</code> shows it as <b>Up</b>.</li>
       <li>The red error is real (dry run, Docker 29). Then <code>-f</code>.</li>
       <li>Last: <code>--rm</code>. "For one-off containers, this is the best practice."</li>
     </ul>
@@ -267,6 +297,7 @@ or force remove</span>
   <span class="lab">YOUR TERMINAL · Lab step 6</span>
   <h2>Why won't my image delete?</h2>
   <div class="cols wide-left">
+<div>
 <pre class="term" style="font-size:19px"><span class="p">$</span> docker rmi file-demo
 <span class="e">Error response from daemon: conflict: unable to remove
 repository reference "file-demo" (must force) - container
@@ -278,6 +309,16 @@ repository reference "file-demo" (must force) - container
 Deleted: sha256:b350f29a4f26…</span>
 
 <span class="p">$</span> docker images                        <span class="c"># gone</span></pre>
+    <div class="namekey">
+      <h4>NAME KEY · container → image</h4>
+      <table>
+        <tr><td>stupefied_blackburn</td><td>→ <b>hello-docker</b> (slide 6)</td></tr>
+        <tr><td>affectionate_shaw</td><td>→ <b>file-demo</b> (slide 7)</td></tr>
+        <tr><td>sleeper</td><td>→ <b>hello-docker</b> (our name)</td></tr>
+      </table>
+      <p class="tip">Find yours: <code>docker ps -a</code> → the <b>IMAGE</b> column, then <b>NAMES</b> (<code>file-demo</code> = <code>affectionate_shaw</code> here)</p>
+    </div>
+    </div>
     <div class="card blue tight">
       <h3><code>rm</code> vs <code>rmi</code></h3>
       <p><code>docker rm</code> = remove a <b>container</b><br><code>docker rmi</code> = remove an <b>image</b> (the <b>i</b>)</p>

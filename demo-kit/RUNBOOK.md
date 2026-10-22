@@ -65,7 +65,7 @@ bash demo-kit/reset.sh           # no leftovers from earlier practice
 | 7 (13) | Deck | Container state diagram | "Build time vs run time." |
 | 8 (14) | Terminal | `docker run -it --rm file-demo sh` → `pwd`, `ls`, `cat message.txt`, `exit` | "If you can't see it, open a shell and look." |
 | 9 (16) | Deck | Cleanup diagram | "Docker does not clean up after you." |
-| 10 (17) | Terminal | `docker ps`, `docker ps -a`, `docker rm <hello-docker container>`, `docker run -d --name sleeper alpine sleep 300`, `docker rm sleeper` (error), `docker rm -f sleeper` | "Use YOUR container names." |
+| 10 (17) | Terminal | `docker ps`, `docker ps -a`, `docker rm <hello-docker container>`, `docker run -d --name sleeper hello-docker sleep 300`, `docker rm sleeper` (error), `docker rm -f sleeper` | "Use YOUR container names." |
 | 11 (21) | Terminal | `docker rmi file-demo` (error), `docker rm <file-demo container>`, `docker rmi file-demo` | "Containers first, then the image." |
 | 12 (24) | Activity page | 6 cards | "The command in chat on go." |
 | 13 (30) | Deck | COPY vs bind mount | "A photocopy vs a window." |

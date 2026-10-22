@@ -169,7 +169,7 @@ a239a14bf944   hello-docker   "echo 'hello world!'"    3 minutes ago   Exited (0
       <li>Remove the stopped <code>hello-docker</code> container. Use <b>your</b> name (Tab completes it):
         <div class="cmdwrap"><pre class="cmd"><code>docker rm YOUR_CONTAINER_NAME</code></pre><button type="button" class="copy">Copy</button></div></li>
       <li>Start a container that keeps running for 5 minutes (<code>-d</code> = in the background), and try to remove it:
-        <div class="cmdwrap"><pre class="cmd"><code>docker run -d --name sleeper alpine sleep 300
+        <div class="cmdwrap"><pre class="cmd"><code>docker run -d --name sleeper hello-docker sleep 300
 docker ps
 docker rm sleeper</code></pre><button type="button" class="copy">Copy</button></div>
 <pre class="see"><span class="e">Error response from daemon: cannot remove container "sleeper": container is running: stop the container before removing or force remove</span></pre></li>

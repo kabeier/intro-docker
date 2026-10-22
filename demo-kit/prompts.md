@@ -43,7 +43,7 @@ CMD ["cat", "/app/message.txt"]
 | 8 | `docker run -it --rm file-demo sh` → `pwd` · `ls` · `cat message.txt` · `exit` | `/app` · `message.txt` · the message |
 | 10 | `docker ps` / `docker ps -a` | empty / two `Exited (0)` containers |
 | 10 | `docker rm <name>` | prints the name |
-| 10 | `docker run -d --name sleeper alpine sleep 300` → `docker rm sleeper` | `cannot remove container "sleeper": container is running: stop the container before removing or force remove` |
+| 10 | `docker run -d --name sleeper hello-docker sleep 300` → `docker rm sleeper` | `cannot remove container "sleeper": container is running: stop the container before removing or force remove` |
 | 10 | `docker rm -f sleeper` | `sleeper` |
 | 11 | `docker rmi file-demo` | `conflict: unable to remove repository reference "file-demo" (must force) - container … is using its referenced image …` |
 | 11 | `docker rm <file-demo container>` → `docker rmi file-demo` | `Untagged: file-demo:latest`, `Deleted: sha256:…` |
