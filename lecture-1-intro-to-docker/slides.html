@@ -257,7 +257,7 @@ VERSION_ID=3.24.2</span>         <span class="c">← not your OS!</span>
       <p><b>Official Image</b> badge</p>
       <p><b>Tags</b> = versions: <code>3.12</code> · <code>3.12-slim</code> · <code>3.12-alpine</code></p>
       <p><b>Docs</b>: how it's meant to be used</p>
-      <p><b>Size</b>: smaller = faster, safer</p>
+      <p><b>Size</b>: <b>alpine</b> is smallest · <b>slim</b> is the usual pick (pip packages just work)</p>
       <p><b>Pull command</b>: <code>docker pull python:3.12-slim</code></p>
     </div>
     <div class="card red tight">
@@ -271,8 +271,9 @@ VERSION_ID=3.24.2</span>         <span class="c">← not your OS!</span>
   </div>
   <aside class="notes">
     <p><b>** LIVE, 2 minutes. **</b> Browser: <b>hub.docker.com/_/python</b>. Point at: Docker Official Image badge → the <b>Tags</b> tab → <code>3.12-slim</code> and <code>3.12-alpine</code> → the compressed size column → the pull command with its copy button.</p>
+    <p><b>Instructor note: sizes.</b> <b>Alpine is smaller</b> than slim. Hub shows the <b>compressed download</b> (slim ~43 MB, alpine ~17 MB). <code>docker images</code> on slide 14 shows the <b>unpacked</b> size (slim 119 MB, alpine ~55 MB). Why slim anyway: alpine uses a different C library (musl), so many <code>pip install</code> packages must compile or fail there. Slim = a bit bigger, but things just work.</p>
     <p>"Engineers spend far more time choosing and configuring existing images than creating new ones."</p>
-    <p><b>Then:</b> "Paste both pull commands now. They download while we do the activity." (About 175 MB together. If Wi-Fi is slow, alpine alone is ~20 MB compressed.) Go straight to the activity.</p>
+    <p><b>Then:</b> "Paste both pull commands now. They download while we do the activity." (About 60 MB to download together. If Wi-Fi is slow, alpine alone is ~17 MB.) Go straight to the activity.</p>
   </aside>
 </section>
 
