@@ -35,6 +35,7 @@
   <h1>Leveraging Docker</h1>
   <p class="sub">Write a Dockerfile, build your own image, run it, look inside, clean up, and automate it. All in your terminal.</p>
   <aside class="notes">
+    <p class="plan"><b>The plan:</b> Today we write a Dockerfile, build our own image, run it, look inside, clean up and automate it. All in the terminal.</p>
     <p><b>Before class</b> (demo-kit/RUNBOOK.md): run <code>demo-kit/reset.sh</code> so <code>hello-docker</code>, <code>file-demo</code>, <code>lecture2-demo</code> don't exist yet. <code>alpine</code> is pulled. An empty folder ready.</p>
     <p>Tabs: this deck, <b>Terminal Lab 2</b> page, the activity page, VS Code. Terminal font big. Press <b>T</b>.</p>
     <p>Backup if your machine misbehaves: <code>demo-kit/lecture2-demo/</code> has every finished file.</p>
@@ -52,6 +53,7 @@
   </ul>
   <p class="bottomline">By the end: a Dockerfile, two images, and a script that does it all for you.</p>
   <aside class="notes">
+    <p class="plan"><b>The plan:</b> Last time we used other people's images. Today we make our own. Everyone sets up the folder.</p>
     <p><b>** HANDS-ON, 1 minute. **</b> Wait until most have the empty folder open. "We create files in the editor, and run commands in the terminal."</p>
     <p>No <code>code</code> command? Open the folder from the editor's File menu.</p>
   </aside>
@@ -61,6 +63,7 @@
   <img src="../diagrams/DK2-01-pipeline.png" alt="A Dockerfile, the recipe, is plain text you write: FROM alpine latest and CMD echo hello world. docker build -t hello-docker . turns it into an image, the blueprint: a packaged snapshot that is inert and does nothing by itself. docker run hello-docker makes containers from the image, each run a new container. List images with docker images and containers with docker ps -a.">
   <div class="src">diagrams/DK2-01-pipeline.tldr</div>
   <aside class="notes">
+    <p class="plan"><b>The plan:</b> A picture of the workflow: Dockerfile, then image, then container.</p>
     <p>"A common mistake: thinking Docker is one thing you 'run'. It's a pipeline with three layers."</p>
     <ul>
       <li><b>Dockerfile</b> = the recipe. Plain text: what to start from, what files to include, what command to run.</li>
@@ -90,6 +93,7 @@ CMD ["echo", "hello world!"]</pre>
   </div>
   <p class="bottomline">A Dockerfile is not magic: every line is an instruction you can read.</p>
   <aside class="notes">
+    <p class="plan"><b>The plan:</b> Everyone writes a two-line Dockerfile.</p>
     <p><b>** HANDS-ON, about 2 minutes. **</b> Create the file in the editor, named exactly <code>Dockerfile</code>: capital D, no <code>.txt</code>.</p>
     <ul>
       <li><code>alpine</code> = a very small Linux, about 8 MB. We opened a shell in it in Lecture 1.</li>
@@ -123,6 +127,7 @@ hello-docker:latest   2a10af81544d       8.42MB</span>
     </div>
   </div>
   <aside class="notes">
+    <p class="plan"><b>The plan:</b> We build that Dockerfile into an image, find it, and run it.</p>
     <p><b>** HANDS-ON, about 3 minutes. **</b> Thumbs up in chat on "hello world!".</p>
     <ul>
       <li>Build output: lines starting <code>#1 #2…</code> are steps. Find <code>FROM</code> and <code>naming to … hello-docker</code>. (Shortened on the slide.)</li>
@@ -161,6 +166,7 @@ CMD ["cat", "/app/message.txt"]</pre>
     </div>
   </div>
   <aside class="notes">
+    <p class="plan"><b>The plan:</b> We put a file inside an image using WORKDIR and COPY.</p>
     <p><b>** HANDS-ON, about 4 minutes. **</b></p>
     <ul>
       <li>New tag <code>file-demo</code>, "so we don't overwrite the previous image".</li>
@@ -176,6 +182,7 @@ CMD ["cat", "/app/message.txt"]</pre>
   <img src="../diagrams/DK2-02-container-state.png" alt="hello-docker has two lines: FROM alpine latest, the environment, and CMD echo hello world, the execution command, with nothing in between. file-demo has four: FROM alpine latest, WORKDIR /app as the working directory, COPY message.txt into /app as your file baked in, and CMD cat /app/message.txt. Only one CMD per Dockerfile; it runs when the container starts, not when you build.">
   <div class="src">diagrams/DK2-02-container-state.tldr</div>
   <aside class="notes">
+    <p class="plan"><b>The plan:</b> A picture of why a container's changes disappear.</p>
     <p>The curriculum's "container state" pictures, side by side.</p>
     <ul>
       <li>hello-docker: <b>environment</b> + <b>execution command</b>.</li>
@@ -206,6 +213,7 @@ CMD ["cat", "/app/message.txt"]</pre>
   </div>
   <p class="bottomline">If you can't see it, open a shell and look.</p>
   <aside class="notes">
+    <p class="plan"><b>The plan:</b> We go inside our own image and check the file is there.</p>
     <p><b>** HANDS-ON, about 2 minutes. **</b> Curriculum objective: "inspect what's happening inside that container".</p>
     <ul>
       <li>The prompt says <code>/app #</code>: the WORKDIR.</li>
@@ -230,6 +238,7 @@ CMD ["cat", "/app/message.txt"]</pre>
   </div>
   <div class="src">diagrams/DK2-03-cleanup.tldr</div>
   <aside class="notes">
+    <p class="plan"><b>The plan:</b> A picture of how to read the random container names.</p>
     <p>"Docker does <b>not</b> clean up after you. Every build and every run leaves something behind."</p>
     <ul>
       <li>Containers <b>depend on</b> images. So: containers first, then the image.</li>
@@ -280,6 +289,7 @@ or force remove</span>
     </div>
   </div>
   <aside class="notes">
+    <p class="plan"><b>The plan:</b> Where did my containers go? We find stopped ones with docker ps -a and clean them up.</p>
     <p><b>** HANDS-ON, about 4 minutes. **</b></p>
     <ul>
       <li><code>docker ps</code> = running only. Ours ran for a split second, so: empty. "Beginners think they're gone. They're not."</li>
@@ -330,6 +340,7 @@ Deleted: sha256:b350f29a4f26…</span>
     </div>
   </div>
   <aside class="notes">
+    <p class="plan"><b>The plan:</b> Why an image won't delete, and how to read that error.</p>
     <p><b>** HANDS-ON, about 3 minutes. **</b> The IDs and names on their screens differ: read theirs.</p>
     <ul>
       <li><code>rmi</code> = "remove <b>image</b>". <code>rm</code> was for containers (slide 10). It deletes the image from <b>your laptop</b> only; Docker Hub still has it.</li>
@@ -352,6 +363,7 @@ Deleted: sha256:b350f29a4f26…</span>
   </ol>
   <p class="muted small" style="margin-top:24px">Page: activity-which-command/</p>
   <aside class="notes">
+    <p class="plan"><b>The plan:</b> Activity: a situation appears, and everyone types the command they'd use.</p>
     <p>About 30 seconds a card; the first 6 are the core set. The error messages on cards 6 and 7 are the real ones from the last two slides.</p>
     <p>Card 10 (bonus) leads into the next slide: you edited message.txt, why didn't the output change?</p>
     <p>Answers are also in your Notes ("Docker Lectures - Teacher Guide").</p>
@@ -363,6 +375,7 @@ Deleted: sha256:b350f29a4f26…</span>
   <img src="../diagrams/DK2-04-copy-vs-mount.png" alt="Top row: COPY during docker build puts a frozen copy of message.txt into the image file-demo; editing message.txt on the laptop means the container still prints the old text until you rebuild. Bottom row: docker run -v PWD:/app connects the laptop folder to /app in the container; edit message.txt and the next run prints the new text, no rebuild. Shipping an app: COPY. Working on it every day: a bind mount.">
   <div class="src">diagrams/DK2-04-copy-vs-mount.tldr</div>
   <aside class="notes">
+    <p class="plan"><b>The plan:</b> A picture of copying files in vs mounting a folder.</p>
     <p>Curriculum objective: "connect your local machine's files to a running container to support real development workflows". The <code>run.sh</code> in a few minutes also mentions a bind mount.</p>
     <ul>
       <li><b>COPY</b> = a photocopy at build time. Edit the original: the photocopy doesn't change.</li>
@@ -392,6 +405,7 @@ Deleted: sha256:b350f29a4f26…</span>
     </div>
   </div>
   <aside class="notes">
+    <p class="plan"><b>The plan:</b> We mount our folder, so an edit on the laptop shows up with no rebuild.</p>
     <p><b>** HANDS-ON, about 2 minutes. **</b> (Rebuild first: we deleted file-demo on slide 11.)</p>
     <ul>
       <li>Without <code>-v</code>: the old text. COPY froze it at build time.</li>
@@ -433,6 +447,7 @@ Edited on my laptop.</span></pre>
     </div>
   </div>
   <aside class="notes">
+    <p class="plan"><b>The plan:</b> We stop retyping commands: run.sh does it all.</p>
     <p><b>** HANDS-ON, about 3 minutes. **</b> Copy <code>run.sh</code> from the lab page (word for word from the curriculum).</p>
     <ul>
       <li>Run it <b>before</b> <code>chmod</code> on purpose: "Permission denied" (seen in the dry run, in bash; zsh on a Mac words it a little differently, same meaning). A new file isn't allowed to run as a program. <code>chmod +x</code> = make it executable.</li>
@@ -463,6 +478,7 @@ Edited on my laptop.</span></pre>
     </div>
   </div>
   <aside class="notes">
+    <p class="plan"><b>The plan:</b> Two tools the homework needs: environment variables, and running a script inside a container.</p>
     <p>2 minutes. These aren't in the lesson text, but Tasks 3 and 4 need them. Both "watch outs" were reproduced in the dry run.</p>
     <p>Pick a base: Task 4 with a shell script → <code>alpine</code>. With Python → <code>python:3.12-slim</code> (Lecture 1!).</p>
   </aside>
@@ -480,6 +496,7 @@ Edited on my laptop.</span></pre>
   </div>
   <p class="bottomline">If Docker feels repetitive, that's the point.</p>
   <aside class="notes">
+    <p class="plan"><b>The plan:</b> Walk through Homework Part II.</p>
     <p>Full steps on the class site (Homework Part II), with git steps and "Or ask Claude" prompts. The assignment repo: github.com/Code-Platoon-Assignments/docker-fundamentals.</p>
     <p>"In future lectures you'll run several containers together (Docker Compose)."</p>
   </aside>

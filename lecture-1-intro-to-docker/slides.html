@@ -24,6 +24,7 @@
   <h1>Introduction to Docker</h1>
   <p class="sub">Why does code that works on one laptop crash on another, and how do containers fix it? Laptops open: today is hands-on.</p>
   <aside class="notes">
+    <p class="plan"><b>The plan:</b> Today: why code that works on one laptop crashes on another, and how containers fix it. Laptops open.</p>
     <p><b>Before class</b> (demo-kit/RUNBOOK.md): Docker Desktop running, <code>docker version</code> shows a <b>Server</b> section. Pre-pull <code>alpine</code>, <code>hello-world</code>, <code>python:3.12-slim</code>, <code>python:3.12-alpine</code> with <code>demo-kit/pre-pull.sh</code>.</p>
     <p>Tabs: this deck, <b>Terminal Lab 1</b> page, the activity page, <b>hub.docker.com/_/python</b>. Terminal font big (Cmd/Ctrl +).</p>
     <p>Say: "Everyone open a terminal now. You'll type along all lecture. The lab page on the class site has every command with a Copy button." Press <b>T</b>.</p>
@@ -39,6 +40,7 @@
   </ul>
   <p class="bottomline">Every laptop is different. Docker makes the environment the same everywhere.</p>
   <aside class="notes">
+    <p class="plan"><b>The plan:</b> Everyone checks their Python version and pastes it in the chat. The answers won't match, and that's the problem Docker fixes.</p>
     <p><b>** LIVE, 2 minutes. **</b> Run it in your own terminal first. (Instructor laptop answered <code>Python 3.14.7</code> in the dry run.)</p>
     <p>Read out the spread from chat: 3.11, 3.12, 3.13, "command not found"… "If we all ran the same Python project, some of us would crash. That's the problem Docker solves."</p>
     <p>Keep it light: nobody's version is "wrong".</p>
@@ -50,6 +52,7 @@
   <img src="../diagrams/DK1-01-whats-inside.png" alt="Maria's laptop runs macOS with Python 3.14 and says it works on my machine. Sam's laptop runs Windows with Python 3.11 and says it crashes on mine. Between them one container holds the application code, the runtime Python 3.12, system libraries and dependencies, and configuration and environment variables. Both laptops run the same container.">
   <div class="src">diagrams/DK1-01-whats-inside.tldr</div>
   <aside class="notes">
+    <p class="plan"><b>The plan:</b> A picture of what's inside a container.</p>
     <p>"Docker is a platform that packages an app <b>and everything it needs</b> into a standard unit: a <b>container</b>."</p>
     <ul>
       <li>A container holds: the <b>code</b>, the <b>runtime</b> (Python, Node), the <b>libraries</b>, the <b>configuration</b>.</li>
@@ -84,6 +87,7 @@
   </div>
   <p class="bottomline">Docker turns "set up your machine" into "run this one thing".</p>
   <aside class="notes">
+    <p class="plan"><b>The plan:</b> Why Docker was created: what setups were like before it.</p>
     <p>Ask chat: "Who has lost an hour (or a day) to installing something?" Lots of hands.</p>
     <p>"Environment as code": you'll write that code, a Dockerfile, in Lecture 2.</p>
   </aside>
@@ -93,6 +97,7 @@
   <img src="../diagrams/DK1-02-machine-container-vm.png" alt="Three columns. My local machine runs the whole operating system with everything you ever installed, unique to you and hard to copy. Containers: container 1 runs app A and container 2 runs app B, each with only what it needs, on the Docker Engine, sharing one host OS kernel, megabytes, starting in seconds. Virtual machines: VM 1 runs app A and VM 2 runs app B, each with its own full OS on virtual hardware, gigabytes, starting in minutes. VMs virtualize hardware, containers virtualize applications.">
   <div class="src">diagrams/DK1-02-machine-container-vm.tldr</div>
   <aside class="notes">
+    <p class="plan"><b>The plan:</b> A picture comparing your machine, a container and a virtual machine.</p>
     <ul>
       <li><b>Your machine:</b> the OS manages your <i>entire</i> computer, not just one project. Unique to you.</li>
       <li><b>A container:</b> lives inside your machine, inside the Docker background service. Only what one task needs, with pinned versions. Faster because it carries less.</li>
@@ -116,6 +121,7 @@
   </table>
   <p class="bottomline">VMs virtualize hardware. Containers virtualize applications.</p>
   <aside class="notes">
+    <p class="plan"><b>The plan:</b> Containers vs virtual machines: isolated processes, not mini computers.</p>
     <p>Don't go deep: the curriculum says "we aren't going to go much into detail". 1 minute.</p>
     <p>"In two minutes you'll prove the 'isolated process' part yourself."</p>
   </aside>
@@ -150,6 +156,7 @@ appears to be working correctly.</span></pre>
   </div>
   <p class="labref">Every command is on the class site: Terminal Lab 1, with Copy buttons.</p>
   <aside class="notes">
+    <p class="plan"><b>The plan:</b> Everyone checks Docker works and runs hello-world in their own terminal.</p>
     <p><b>** HANDS-ON, about 3 minutes. **</b> Type it on your screen first, then "your turn". Thumbs up in chat when you see "Hello from Docker!".</p>
     <ul>
       <li><code>docker version</code> = the curriculum's install check. Point at <b>Client</b> and <b>Server</b>.</li>
@@ -188,6 +195,7 @@ VERSION_ID=3.24.2</span>         <span class="c">← not your OS!</span>
   </div>
   <p class="bottomline">A container is an isolated process, not a mini computer.</p>
   <aside class="notes">
+    <p class="plan"><b>The plan:</b> Everyone steps inside a real container and looks around.</p>
     <p><b>** HANDS-ON, about 4 minutes. **</b></p>
     <ul>
       <li>First command: Alpine Linux, even on a Mac or Windows laptop. (Dry run host: Fedora. Inside: Alpine 3.24.2. Their version number may differ a little.)</li>
@@ -204,6 +212,7 @@ VERSION_ID=3.24.2</span>         <span class="c">← not your OS!</span>
   <img src="../diagrams/DK1-03-modern-stack.png" alt="The same image moves from your laptop, where you build and run while you code, to CI/CD in GitHub Actions, where it is built and tested, to the cloud on AWS, GCP or Azure, and at scale to Kubernetes running hundreds of containers. One container per job: a front end from a node image, a back end from a python image, a database from a postgres image.">
   <div class="src">diagrams/DK1-03-modern-stack.tldr</div>
   <aside class="notes">
+    <p class="plan"><b>The plan:</b> A picture of where Docker sits in a modern stack.</p>
     <ul>
       <li>The <b>same environment</b> from development through testing and production: that's why deploys get reliable.</li>
       <li><b>CI/CD</b>: you'll meet GitHub Actions later in Fundamentals; it builds and tests in containers.</li>
@@ -224,6 +233,7 @@ VERSION_ID=3.24.2</span>         <span class="c">← not your OS!</span>
   </div>
   <p class="bottomline">If rebuilding your container is painful, your Docker setup needs improvement.</p>
   <aside class="notes">
+    <p class="plan"><b>The plan:</b> Four habits of a good container: small, one job, disposable, and configured.</p>
     <ul>
       <li><b>Small:</b> you'll see real sizes in 10 minutes (8 MB vs 1 GB).</li>
       <li><b>One job:</b> the picture before: front end, back end, database = 3 containers.</li>
@@ -239,6 +249,7 @@ VERSION_ID=3.24.2</span>         <span class="c">← not your OS!</span>
   <img src="../diagrams/DK1-04-docker-hub.png" alt="docker run python: Docker first checks whether the image is on my machine. If yes, it runs a container. If no, it says unable to find image locally and pulls it from Docker Hub, GitHub for Docker images, saves it, then runs. Official images like python, node, postgres, nginx and redis are maintained, patched and documented. Random community images may be outdated, insecure or badly configured.">
   <div class="src">diagrams/DK1-04-docker-hub.tldr</div>
   <aside class="notes">
+    <p class="plan"><b>The plan:</b> A picture of Docker Hub: where images come from.</p>
     <p>"Docker doesn't magically know what 'python' is." Callback: hello-world said "Unable to find image locally" → pulled it. Run it again: no download.</p>
     <ul>
       <li><b>Docker Hub</b> = GitHub for Docker images; a marketplace of prebuilt environments; Docker's default source.</li>
@@ -270,6 +281,7 @@ VERSION_ID=3.24.2</span>         <span class="c">← not your OS!</span>
     </div>
   </div>
   <aside class="notes">
+    <p class="plan"><b>The plan:</b> How to read an image page on Docker Hub: badge, tags, docs and size.</p>
     <p><b>** LIVE, 2 minutes. **</b> Browser: <b>hub.docker.com/_/python</b>. Point at: Docker Official Image badge → the <b>Tags</b> tab → <code>3.12-slim</code> and <code>3.12-alpine</code> → the compressed size column → the pull command with its copy button.</p>
     <p><b>Instructor note: sizes.</b> <b>Alpine is smaller</b> than slim. Hub shows the <b>compressed download</b> (slim ~43 MB, alpine ~17 MB). <code>docker images</code> on slide 14 shows the <b>unpacked</b> size (slim 119 MB, alpine ~55 MB). Why slim anyway: alpine uses a different C library (musl), so many <code>pip install</code> packages must compile or fail there. Slim = a bit bigger, but things just work.</p>
     <p>"Engineers spend far more time choosing and configuring existing images than creating new ones."</p>
@@ -288,6 +300,7 @@ VERSION_ID=3.24.2</span>         <span class="c">← not your OS!</span>
   </ol>
   <p class="muted small" style="margin-top:24px">Page: activity-habit-or-trap/ · your pulls keep downloading meanwhile</p>
   <aside class="notes">
+    <p class="plan"><b>The plan:</b> Activity: a Docker decision appears, and everyone says habit or trap.</p>
     <p>About 30 seconds a card; the first 6 are the core set. Space reveals; click the button chat voted for most to show right/wrong.</p>
     <p>Card 7 is the sizes we'll see next (slim 119 MB vs full 1.11 GB). Card 10 is a bonus.</p>
     <p>Answers are also in your Notes ("Docker Lectures - Teacher Guide").</p>
@@ -321,6 +334,7 @@ python:3.12-slim     df18428df8a0      119MB</span>
   </div>
   <p class="bottomline">Nobody installed Python 3.12. Docker pulled an environment and ran it.</p>
   <aside class="notes">
+    <p class="plan"><b>The plan:</b> Everyone runs the same Python image and gets the same version. That's the fix for slide 2.</p>
     <p><b>** HANDS-ON, about 4 minutes. **</b></p>
     <ul>
       <li><code>docker images</code> lists what's on your machine. Only the instructor has <code>python:3.12</code> (pre-pulled, so we didn't all download 1 GB).</li>
@@ -344,6 +358,7 @@ python:3.12-slim     df18428df8a0      119MB</span>
   </ul>
   <p class="bottomline">Next lecture: you write the recipe (a Dockerfile), build your own image, and clean up after it.</p>
   <aside class="notes">
+    <p class="plan"><b>The plan:</b> A recap of what we now know.</p>
     <p>"The most important takeaway isn't the commands, it's the mental model: a minimal, disposable environment that borrows your OS."</p>
   </aside>
 </section>
@@ -360,6 +375,7 @@ python:3.12-slim     df18428df8a0      119MB</span>
     <p class="small"><code>docker run --rm hello-world</code> must work. Lecture 2 is building your own images, all in the terminal.</p>
   </div>
   <aside class="notes">
+    <p class="plan"><b>The plan:</b> Walk through Homework Part I.</p>
     <p>Full steps are on the class site (Homework Part I). The Docker Fundamentals assignment comes after Lecture 2.</p>
   </aside>
 </section>
